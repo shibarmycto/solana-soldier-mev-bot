@@ -482,26 +482,29 @@ const Dashboard = () => {
       >
         {activeTab === "overview" && (
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Whale Wallets */}
+            {/* Trading Stats */}
             <div className="glass-card p-6">
               <h3 className="font-unbounded font-bold text-lg mb-4 text-white flex items-center gap-2">
-                <Activity className="w-5 h-5 text-[#14F195]" />
-                Tracked Whales
+                <Target className="w-5 h-5 text-[#14F195]" />
+                Trading Engine
               </h3>
               <div className="space-y-3">
-                {WHALE_WALLETS.slice(0, 5).map((wallet, index) => (
-                  <div key={wallet} className="flex items-center justify-between p-3 bg-white/5 rounded-sm">
-                    <code className="text-sm text-gray-300">{wallet.slice(0, 12)}...</code>
-                    <a
-                      href={`https://solscan.io/account/${wallet}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#14F195] hover:underline text-sm"
-                    >
-                      View
-                    </a>
-                  </div>
-                ))}
+                <div className="flex justify-between items-center p-3 bg-white/5 rounded-sm">
+                  <span className="text-gray-400">Profit Target</span>
+                  <span className="font-mono text-[#14F195]">${tradingStats?.min_profit_target || 2}/trade</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-white/5 rounded-sm">
+                  <span className="text-gray-400">Max Trade Time</span>
+                  <span className="font-mono text-[#14F195]">{tradingStats?.max_trade_time_seconds || 120}s</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-white/5 rounded-sm">
+                  <span className="text-gray-400">Success Rate</span>
+                  <span className="font-mono text-[#14F195]">{(tradingStats?.success_rate || 0).toFixed(1)}%</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-white/5 rounded-sm">
+                  <span className="text-gray-400">Trades Today</span>
+                  <span className="font-mono text-[#14F195]">{tradingStats?.trades_today || 0}</span>
+                </div>
               </div>
             </div>
             
@@ -509,30 +512,233 @@ const Dashboard = () => {
             <div className="glass-card p-6">
               <h3 className="font-unbounded font-bold text-lg mb-4 text-white flex items-center gap-2">
                 <Clock className="w-5 h-5 text-[#9945FF]" />
-                Recent Activity
+                Recent Whale Activity
               </h3>
-              {trades.length > 0 ? (
+              {whaleActivities.length > 0 ? (
                 <div className="space-y-3">
-                  {trades.slice(0, 5).map((trade, index) => (
-                    <div key={trade.id} className="flex items-center justify-between p-3 bg-white/5 rounded-sm">
+                  {whaleActivities.slice(0, 5).map((activity, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-sm">
                       <div className="flex items-center gap-2">
-                        {trade.trade_type === "BUY" ? (
-                          <TrendingUp className="w-4 h-4 text-[#14F195]" />
-                        ) : (
-                          <TrendingUp className="w-4 h-4 text-red-500 transform rotate-180" />
-                        )}
-                        <span className="text-sm text-gray-300">{trade.trade_type}</span>
+                        <Activity className="w-4 h-4 text-[#14F195]" />
+                        <span className="text-sm text-gray-300">{activity.action} {activity.token_symbol}</span>
                       </div>
-                      <span className={`text-sm ${trade.status === "COMPLETED" ? "text-[#14F195]" : "text-yellow-500"}`}>
-                        {trade.status}
-                      </span>
+                      <code className="text-xs text-gray-500">{activity.whale_address?.slice(0, 8)}...</code>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-8">No trades yet</p>
+                <p className="text-gray-500 text-center py-8">No whale activity detected yet</p>
               )}
             </div>
+          </div>
+        )}
+        
+        {activeTab === "trending" && (
+          <div className="glass-card p-6">
+            <h3 className="font-unbounded font-bold text-lg mb-4 text-white flex items-center gap-2">
+              <Flame className="w-5 h-5 text-[#FF9500]" />
+              Trending Tokens
+            </h3>
+            {trendingTokens.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="text-left p-3 text-xs uppercase tracking-wider text-gray-500">Token</th>
+                      <th className="text-left p-3 text-xs uppercase tracking-wider text-gray-500">Price</th>
+                      <th className="text-left p-3 text-xs uppercase tracking-wider text-gray-500">24h</th>
+                      <th className="text-left p-3 text-xs uppercase tracking-wider text-gray-500">Liquidity</th>
+                      <th className="text-left p-3 text-xs uppercase tracking-wider text-gray-500">Volume</th>
+                      <th className="text-left p-3 text-xs uppercase tracking-wider text-gray-500">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trendingTokens.map((token, index) => (
+                      <tr key={index} className="border-b border-white/5 hover:bg-white/5">
+                        <td className="p-3">
+                          <div>
+                            <span className="font-bold text-white">{token.symbol}</span>
+                            <p className="text-xs text-gray-500">{token.name?.slice(0, 20)}</p>
+                          </div>
+                        </td>
+                        <td className="p-3 font-mono text-white">${token.price_usd?.toFixed(6) || "0"}</td>
+                        <td className={`p-3 font-mono ${token.price_change_24h >= 0 ? "text-[#14F195]" : "text-red-500"}`}>
+                          {token.price_change_24h >= 0 ? "+" : ""}{token.price_change_24h?.toFixed(2) || 0}%
+                        </td>
+                        <td className="p-3 font-mono text-gray-400">${(token.liquidity_usd || 0).toLocaleString()}</td>
+                        <td className="p-3 font-mono text-gray-400">${(token.volume_24h || 0).toLocaleString()}</td>
+                        <td className="p-3">
+                          <button
+                            onClick={() => {
+                              setRugCheckAddress(token.address);
+                              setActiveTab("rugcheck");
+                            }}
+                            className="text-xs bg-[#9945FF]/20 text-[#9945FF] px-2 py-1 rounded-sm hover:bg-[#9945FF]/30"
+                          >
+                            Check
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">Loading trending tokens...</p>
+            )}
+          </div>
+        )}
+        
+        {activeTab === "rugcheck" && (
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="glass-card p-6">
+              <h3 className="font-unbounded font-bold text-lg mb-4 text-white flex items-center gap-2">
+                <Shield className="w-5 h-5 text-[#14F195]" />
+                Rug Check
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm text-gray-400 block mb-2">Token Address</label>
+                  <input
+                    type="text"
+                    value={rugCheckAddress}
+                    onChange={(e) => setRugCheckAddress(e.target.value)}
+                    placeholder="Enter Solana token address..."
+                    className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-3 text-white font-mono text-sm focus:border-[#9945FF] outline-none"
+                    data-testid="rugcheck-input"
+                  />
+                </div>
+                <button
+                  onClick={performRugCheck}
+                  disabled={checkingRug || !rugCheckAddress}
+                  className="w-full btn-primary py-3 rounded-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                  data-testid="rugcheck-btn"
+                >
+                  {checkingRug ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="w-4 h-4" />
+                      Check Token Safety
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+            
+            {rugCheckResult && (
+              <div className="glass-card p-6">
+                <h3 className="font-unbounded font-bold text-lg mb-4 text-white flex items-center gap-2">
+                  {rugCheckResult.is_safe ? (
+                    <CheckCircle className="w-5 h-5 text-[#14F195]" />
+                  ) : (
+                    <AlertTriangle className="w-5 h-5 text-[#FF3B30]" />
+                  )}
+                  {rugCheckResult.is_safe ? "SAFE" : "RISKY"}
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400">Risk Score:</span>
+                    <div className="flex-1 bg-white/10 h-3 rounded-sm overflow-hidden">
+                      <div 
+                        className={`h-full ${rugCheckResult.risk_score > 0.5 ? "bg-[#FF3B30]" : "bg-[#14F195]"}`}
+                        style={{ width: `${rugCheckResult.risk_score * 100}%` }}
+                      />
+                    </div>
+                    <span className="font-mono text-white">{(rugCheckResult.risk_score * 100).toFixed(0)}%</span>
+                  </div>
+                  
+                  {rugCheckResult.warnings?.length > 0 && (
+                    <div>
+                      <p className="text-sm text-gray-400 mb-2">Warnings:</p>
+                      <ul className="space-y-1">
+                        {rugCheckResult.warnings.map((warning, i) => (
+                          <li key={i} className="text-sm text-yellow-500 flex items-center gap-2">
+                            <AlertTriangle className="w-3 h-3" />
+                            {warning}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {rugCheckResult.details && (
+                    <div className="border-t border-white/10 pt-4">
+                      <p className="text-sm text-gray-400 mb-2">Details:</p>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        {rugCheckResult.details.liquidity_usd !== undefined && (
+                          <div className="bg-white/5 p-2 rounded-sm">
+                            <span className="text-gray-500">Liquidity</span>
+                            <p className="font-mono text-white">${rugCheckResult.details.liquidity_usd?.toLocaleString()}</p>
+                          </div>
+                        )}
+                        {rugCheckResult.details.holder_count !== undefined && (
+                          <div className="bg-white/5 p-2 rounded-sm">
+                            <span className="text-gray-500">Holders</span>
+                            <p className="font-mono text-white">{rugCheckResult.details.holder_count}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {activeTab === "whales" && (
+          <div className="glass-card p-6">
+            <h3 className="font-unbounded font-bold text-lg mb-4 text-white flex items-center gap-2">
+              <Activity className="w-5 h-5 text-[#14F195]" />
+              Whale Activities
+            </h3>
+            {whaleActivities.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="text-left p-3 text-xs uppercase tracking-wider text-gray-500">Whale</th>
+                      <th className="text-left p-3 text-xs uppercase tracking-wider text-gray-500">Action</th>
+                      <th className="text-left p-3 text-xs uppercase tracking-wider text-gray-500">Token</th>
+                      <th className="text-left p-3 text-xs uppercase tracking-wider text-gray-500">Amount</th>
+                      <th className="text-left p-3 text-xs uppercase tracking-wider text-gray-500">Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {whaleActivities.map((activity, index) => (
+                      <tr key={index} className="border-b border-white/5 hover:bg-white/5">
+                        <td className="p-3">
+                          <a 
+                            href={`https://solscan.io/account/${activity.whale_address}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono text-[#14F195] hover:underline"
+                          >
+                            {activity.whale_address?.slice(0, 8)}...
+                          </a>
+                        </td>
+                        <td className="p-3">
+                          <span className={`px-2 py-1 rounded-sm text-xs font-bold ${
+                            activity.action === "BUY" ? "bg-[#14F195]/20 text-[#14F195]" : "bg-red-500/20 text-red-500"
+                          }`}>
+                            {activity.action}
+                          </span>
+                        </td>
+                        <td className="p-3 font-mono text-white">{activity.token_symbol}</td>
+                        <td className="p-3 font-mono text-gray-400">{activity.amount?.toFixed(4)}</td>
+                        <td className="p-3 text-gray-500 text-sm">{new Date(activity.detected_at).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">No whale activity detected yet. Monitoring in progress...</p>
+            )}
           </div>
         )}
         
