@@ -519,14 +519,28 @@ async def autotrade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = update.effective_user.id
     args = context.args
     
-    # Default trade amount
-    trade_amount = 0.1
+    # Default trade amount and stop-loss
+    trade_amount = MIN_TRADE_SOL
+    stop_loss_pct = DEFAULT_STOP_LOSS_PCT
+    
     if args:
         try:
             trade_amount = float(args[0])
+            if len(args) > 1:
+                stop_loss_pct = float(args[1]) / 100  # Convert percentage to decimal
         except ValueError:
-            await update.message.reply_text("Usage: /autotrade <amount_sol> (e.g., /autotrade 0.1)")
+            await update.message.reply_text(f"Usage: /autotrade <sol_amount> [stop_loss_%]\nExample: /autotrade 0.05 15\n\nMin trade: {MIN_TRADE_SOL} SOL")
             return
+    
+    # Enforce minimum trade
+    if trade_amount < MIN_TRADE_SOL:
+        trade_amount = MIN_TRADE_SOL
+    
+    # Enforce stop-loss bounds
+    if stop_loss_pct < 0.01:
+        stop_loss_pct = 0.01
+    elif stop_loss_pct > 0.50:
+        stop_loss_pct = 0.50
     
     # Check user credits
     user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
@@ -565,6 +579,7 @@ async def autotrade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     active_trading_users[telegram_id] = {
         'keypair': keypair,
         'trade_amount': trade_amount,
+        'stop_loss_pct': stop_loss_pct,
         'wallet_public_key': wallet['public_key'],
         'enabled_at': datetime.now(timezone.utc).isoformat()
     }
@@ -578,13 +593,15 @@ Your bot will now automatically trade when whales buy tokens!
 
 *Settings:*
 • Trade Amount: {trade_amount} SOL per signal
+• Stop-Loss: {stop_loss_pct*100:.0f}%
 • Wallet: `{wallet['public_key'][:16]}...`
 • Profit Target: ${MIN_PROFIT_USD}/trade
 • Max Trade Time: {MAX_TRADE_TIME_SECONDS}s
 
 ⚠️ *IMPORTANT:*
 • Real SOL will be used for trades
-• Anti-rug protection is active
+• Stop-loss will auto-sell if loss exceeds {stop_loss_pct*100:.0f}%
+• Use /stoploss to change stop-loss
 • Use /stopautotrade to disable
 
 Good luck! 🚀
@@ -592,7 +609,7 @@ Good luck! 🚀
         parse_mode='Markdown'
     )
     
-    logger.info(f"User {telegram_id} enabled auto-trading with {trade_amount} SOL")
+    logger.info(f"User {telegram_id} enabled auto-trading with {trade_amount} SOL, SL: {stop_loss_pct*100:.0f}%")
 
 async def stopautotrade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /stopautotrade command - disable auto trading"""
