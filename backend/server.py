@@ -84,10 +84,14 @@ logger = logging.getLogger(__name__)
 # Initialize trading components (will be set in startup)
 jupiter_dex: Optional[JupiterDEX] = None
 rug_detector: Optional[RugDetector] = None
-whale_monitor: Optional[WhaleMonitor] = None
-auto_trader: Optional[AutoTrader] = None
+whale_monitor: Optional[WhaleMonitorWebSocket] = None
+auto_trader: Optional[LiveAutoTrader] = None
 trending_scanner: Optional[TrendingTokenScanner] = None
+helius_rpc: Optional[HeliusRPC] = None
 whale_monitor_task: Optional[asyncio.Task] = None
+
+# Store active trading users (telegram_id -> keypair)
+active_trading_users: Dict[int, Dict] = {}
 
 # Pydantic Models
 class UserModel(BaseModel):
