@@ -51,6 +51,8 @@ MAX_SLIPPAGE_BPS = 150  # 1.5% slippage for live trades
 MIN_LIQUIDITY_USD = 10000
 GAS_RESERVE_SOL = 0.01  # Reserve for gas fees
 MAX_TRADE_SOL = 0.5  # Maximum SOL per trade for safety
+MIN_TRADE_SOL = 0.02  # Minimum trade amount
+DEFAULT_STOP_LOSS_PCT = 0.15  # 15% stop loss default
 
 # Live trading flags - read after dotenv loads
 LIVE_TRADING_ENABLED = os.environ.get('LIVE_TRADING_ENABLED', 'false').lower() == 'true'
