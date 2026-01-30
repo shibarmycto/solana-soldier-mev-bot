@@ -1566,6 +1566,7 @@ async def get_system_status():
         "active_trading_users": len(active_trading_users),
         "tracked_whale_wallets": len(WHALE_WALLETS),
         "min_profit_target_usd": MIN_PROFIT_USD,
+        "min_trade_sol": MIN_TRADE_SOL,
         "max_trade_sol": MAX_TRADE_SOL,
         "max_trade_time_seconds": MAX_TRADE_TIME_SECONDS
     }
