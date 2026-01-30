@@ -227,6 +227,16 @@ async def get_trending_tokens():
 
 # Telegram Bot Handlers
 telegram_app = None
+telegram_db = None  # Separate DB connection for telegram thread
+
+def get_telegram_db():
+    """Get MongoDB connection for telegram thread"""
+    global telegram_db
+    if telegram_db is None:
+        from motor.motor_asyncio import AsyncIOMotorClient
+        telegram_client = AsyncIOMotorClient(mongo_url)
+        telegram_db = telegram_client[os.environ['DB_NAME']]
+    return telegram_db
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /start command"""
@@ -234,11 +244,17 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = user.id
     username = user.username or user.first_name
     
-    # Check/create user in database
-    existing_user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
-    if not existing_user:
-        new_user = UserModel(telegram_id=telegram_id, username=username)
-        await db.users.insert_one(new_user.model_dump())
+    try:
+        # Use telegram-specific db connection
+        tg_db = get_telegram_db()
+        
+        # Check/create user in database
+        existing_user = await tg_db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        if not existing_user:
+            new_user = UserModel(telegram_id=telegram_id, username=username)
+            await tg_db.users.insert_one(new_user.model_dump())
+    except Exception as e:
+        logger.error(f"DB error in start_command: {e}")
     
     keyboard = [
         [InlineKeyboardButton("💳 Create Wallet", callback_data="create_wallet"),
