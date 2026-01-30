@@ -596,6 +596,120 @@ async def stopautotrade_command(update: Update, context: ContextTypes.DEFAULT_TY
     else:
         await update.message.reply_text("ℹ️ Auto-trading was not enabled for your account.")
 
+async def pnl_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /pnl command - show P&L report"""
+    telegram_id = update.effective_user.id
+    
+    # Get user's trades from database
+    trades = await db.trades.find(
+        {"user_telegram_id": telegram_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    if not trades:
+        await update.message.reply_text("📊 No trades found. Use /autotrade to start trading!")
+        return
+    
+    # Calculate P&L stats
+    total_pnl = sum(t.get('pnl_usd', 0) for t in trades)
+    total_trades = len(trades)
+    winning = sum(1 for t in trades if t.get('pnl_usd', 0) > 0)
+    losing = sum(1 for t in trades if t.get('pnl_usd', 0) < 0)
+    win_rate = (winning / total_trades * 100) if total_trades else 0
+    
+    # Recent trades
+    recent = trades[:5]
+    recent_text = ""
+    for t in recent:
+        pnl = t.get('pnl_usd', 0)
+        emoji = "🟢" if pnl >= 0 else "🔴"
+        recent_text += f"{emoji} {t.get('token_address', '')[:8]}... ${pnl:+.2f}\n"
+    
+    pnl_emoji = "💰" if total_pnl >= 0 else "📉"
+    
+    await update.message.reply_text(
+        f"""
+{pnl_emoji} *P&L REPORT* {pnl_emoji}
+━━━━━━━━━━━━━━━━━━━━━
+
+*Total P&L:* {'+' if total_pnl >= 0 else ''}${total_pnl:.2f}
+*Total Trades:* {total_trades}
+*Winning:* {winning} 🟢
+*Losing:* {losing} 🔴
+*Win Rate:* {win_rate:.0f}%
+
+*Recent Trades:*
+{recent_text}
+
+Use /trades for full history.
+""",
+        parse_mode='Markdown'
+    )
+
+async def stoploss_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /stoploss command - set stop loss percentage"""
+    telegram_id = update.effective_user.id
+    args = context.args
+    
+    if not args:
+        current_sl = active_trading_users.get(telegram_id, {}).get('stop_loss_pct', DEFAULT_STOP_LOSS_PCT)
+        await update.message.reply_text(
+            f"*Current Stop-Loss:* {current_sl*100:.0f}%\n\nUsage: /stoploss <percentage>\nExample: /stoploss 10 (for 10% stop-loss)",
+            parse_mode='Markdown'
+        )
+        return
+    
+    try:
+        stop_loss_pct = float(args[0]) / 100  # Convert percentage to decimal
+        if stop_loss_pct < 0.01 or stop_loss_pct > 0.50:
+            await update.message.reply_text("❌ Stop-loss must be between 1% and 50%")
+            return
+    except ValueError:
+        await update.message.reply_text("❌ Invalid percentage. Use a number like 10 or 15")
+        return
+    
+    if telegram_id in active_trading_users:
+        active_trading_users[telegram_id]['stop_loss_pct'] = stop_loss_pct
+        await update.message.reply_text(
+            f"✅ Stop-loss updated to *{stop_loss_pct*100:.0f}%*\n\nYour positions will auto-sell if value drops by this amount.",
+            parse_mode='Markdown'
+        )
+    else:
+        await update.message.reply_text("❌ Auto-trading not enabled. Use /autotrade first, then set stop-loss.")
+
+async def trades_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /trades command - show trade history"""
+    telegram_id = update.effective_user.id
+    
+    trades = await db.trades.find(
+        {"user_telegram_id": telegram_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(20)
+    
+    if not trades:
+        await update.message.reply_text("📊 No trades found.")
+        return
+    
+    text = "📊 *TRADE HISTORY* 📊\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+    
+    for t in trades[:10]:
+        status = t.get('status', 'UNKNOWN')
+        pnl = t.get('pnl_usd', 0)
+        pnl_pct = t.get('pnl_pct', 0)
+        
+        if status == "CLOSED":
+            emoji = "🟢" if pnl >= 0 else "🔴"
+            text += f"{emoji} `{t.get('token_address', '')[:8]}...`\n"
+            text += f"   Entry: ${t.get('entry_value_usd', 0):.2f} → Exit: ${t.get('exit_value_usd', 0):.2f}\n"
+            text += f"   P&L: {'+' if pnl >= 0 else ''}${pnl:.2f} ({pnl_pct:+.1f}%)\n\n"
+        elif status == "OPEN":
+            text += f"🟡 `{t.get('token_address', '')[:8]}...` (OPEN)\n"
+            text += f"   Entry: ${t.get('entry_value_usd', 0):.2f}\n\n"
+        else:
+            text += f"⚪ `{t.get('token_address', '')[:8]}...` ({status})\n\n"
+    
+    await update.message.reply_text(text, parse_mode='Markdown')
+
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /status command - show system status"""
     telegram_id = update.effective_user.id
