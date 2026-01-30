@@ -737,8 +737,8 @@ async def positions_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text, parse_mode='Markdown')
 
 async def whale_activity_callback(activity: Dict):
-    """Callback when whale activity is detected"""
-    logger.info(f"Whale activity detected: {activity}")
+    """Callback when whale activity is detected - triggers auto trades"""
+    logger.info(f"🐋 Whale activity detected: {activity}")
     
     # Store in database
     whale_activity = WhaleActivityModel(
@@ -772,6 +772,30 @@ async def whale_activity_callback(activity: Dict):
         )
     except Exception as e:
         logger.error(f"Failed to notify whale activity: {e}")
+    
+    # AUTO-TRADE: Execute trades for all active trading users
+    if AUTO_TRADE_ON_WHALE_SIGNAL and activity.get('action') == 'BUY':
+        logger.info(f"🚀 Auto-trade triggered for {len(active_trading_users)} users")
+        
+        for telegram_id, user_data in active_trading_users.items():
+            try:
+                keypair = user_data.get('keypair')
+                trade_amount = user_data.get('trade_amount', 0.1)
+                
+                if keypair and auto_trader:
+                    # Execute auto trade
+                    result = await auto_trader.process_whale_signal(
+                        activity=activity,
+                        user_keypair=keypair,
+                        user_telegram_id=telegram_id,
+                        trade_amount_sol=trade_amount
+                    )
+                    
+                    if result and result.success:
+                        logger.info(f"✅ Auto-trade successful for user {telegram_id}")
+                    
+            except Exception as e:
+                logger.error(f"Auto-trade error for user {telegram_id}: {e}")
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle button callbacks"""
