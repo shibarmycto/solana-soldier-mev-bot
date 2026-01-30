@@ -1210,6 +1210,10 @@ def run_telegram_bot():
         telegram_app.add_handler(CommandHandler("whales", whales_command))
         telegram_app.add_handler(CommandHandler("pay", pay_command))
         telegram_app.add_handler(CommandHandler("help", help_command))
+        telegram_app.add_handler(CommandHandler("trending", trending_command))
+        telegram_app.add_handler(CommandHandler("rugcheck", rugcheck_command))
+        telegram_app.add_handler(CommandHandler("trade", trade_command))
+        telegram_app.add_handler(CommandHandler("positions", positions_command))
         telegram_app.add_handler(CallbackQueryHandler(button_callback))
         
         logger.info("Starting Telegram bot...")
@@ -1225,10 +1229,45 @@ def run_telegram_bot():
     asyncio.set_event_loop(loop)
     loop.run_until_complete(main())
 
+async def start_whale_monitor():
+    """Start whale monitoring in background"""
+    global whale_monitor
+    if whale_monitor:
+        await whale_monitor.start_monitoring(poll_interval=15)
+
 @app.on_event("startup")
 async def startup_event():
-    """Start telegram bot on app startup"""
+    """Start telegram bot and trading components on app startup"""
+    global jupiter_dex, rug_detector, whale_monitor, auto_trader, trending_scanner, whale_monitor_task
+    
     logger.info("Starting Solana Soldier API...")
+    
+    # Initialize trading components
+    jupiter_dex = JupiterDEX()
+    rug_detector = RugDetector(SOLSCAN_API_KEY)
+    trending_scanner = TrendingTokenScanner()
+    
+    # Initialize whale monitor with callback
+    whale_monitor = WhaleMonitor(
+        whale_wallets=WHALE_WALLETS,
+        solscan_api_key=SOLSCAN_API_KEY,
+        callback=whale_activity_callback
+    )
+    
+    # Initialize auto trader
+    auto_trader = AutoTrader(
+        jupiter=jupiter_dex,
+        rug_detector=rug_detector,
+        db=db,
+        min_profit_usd=MIN_PROFIT_USD,
+        max_trade_time=MAX_TRADE_TIME_SECONDS
+    )
+    
+    logger.info("Trading components initialized")
+    
+    # Start whale monitor in background
+    whale_monitor_task = asyncio.create_task(start_whale_monitor())
+    logger.info("Whale monitor started")
     
     # Start telegram bot in background thread
     bot_thread = threading.Thread(target=run_telegram_bot, daemon=True)
@@ -1238,8 +1277,26 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     """Cleanup on shutdown"""
-    global telegram_app
+    global telegram_app, jupiter_dex, rug_detector, whale_monitor, trending_scanner, whale_monitor_task
+    
+    # Stop whale monitor
+    if whale_monitor:
+        await whale_monitor.stop_monitoring()
+        await whale_monitor.close()
+    
+    if whale_monitor_task:
+        whale_monitor_task.cancel()
+    
+    # Close trading components
+    if jupiter_dex:
+        await jupiter_dex.close()
+    if rug_detector:
+        await rug_detector.close()
+    if trending_scanner:
+        await trending_scanner.close()
+    
     if telegram_app:
         await telegram_app.stop()
+    
     client.close()
     logger.info("Shutdown complete")
