@@ -1,0 +1,150 @@
+{
+  "project_name": "Solana Soldier",
+  "design_philosophy": {
+    "persona": "E1: The Anti-AI Designer",
+    "theme": "Tactical Neon / Cyberpunk Arbitrage",
+    "core_principles": [
+      "Fusion: Military HUD precision meets Crypto Degen energy",
+      "Emotion: Predatory, Fast, Trustworthy",
+      "Contrast: Void Black backgrounds vs. Blinding Neon data",
+      "Density: High-density data grids for the dashboard, cinematic asymmetry for the landing page"
+    ]
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Unbounded, display",
+      "body": "Rajdhani, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "imports": [
+      "@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');"
+    ],
+    "usage": {
+      "h1": "font-unbounded font-black tracking-tighter uppercase",
+      "h2": "font-unbounded font-bold tracking-tight",
+      "body": "font-rajdhani font-medium tracking-wide",
+      "code": "font-mono text-xs tracking-normal"
+    }
+  },
+  "colors": {
+    "palette": {
+      "background": "#050505",
+      "surface": "#0A0A0A",
+      "surface_highlight": "#121212",
+      "border": "#1F1F1F",
+      "primary_gradient": "linear-gradient(135deg, #9945FF 0%, #14F195 100%)",
+      "primary_solid": "#9945FF",
+      "secondary_solid": "#14F195",
+      "accent_danger": "#FF3B30",
+      "accent_info": "#00F0FF",
+      "text_primary": "#E0E0E0",
+      "text_secondary": "#A0A0A0"
+    },
+    "tailwind_overrides": {
+      "css_variables": {
+        "--background": "0 0% 2%",
+        "--foreground": "0 0% 88%",
+        "--card": "0 0% 4%",
+        "--card-foreground": "0 0% 88%",
+        "--popover": "0 0% 4%",
+        "--popover-foreground": "0 0% 88%",
+        "--primary": "266 100% 64%",
+        "--primary-foreground": "0 0% 100%",
+        "--secondary": "155 89% 51%",
+        "--secondary-foreground": "0 0% 0%",
+        "--muted": "0 0% 12%",
+        "--muted-foreground": "0 0% 63%",
+        "--accent": "186 100% 50%",
+        "--accent-foreground": "0 0% 0%",
+        "--destructive": "3 100% 59%",
+        "--destructive-foreground": "0 0% 100%",
+        "--border": "0 0% 12%",
+        "--input": "0 0% 12%",
+        "--ring": "266 100% 64%",
+        "--radius": "0px"
+      }
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": {
+      "class": "bg-black/40 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]",
+      "usage": "Overlays, Sticky Headers, Floating Action Panels"
+    },
+    "tracing_beam": {
+      "description": "Animated gradient border for active trades",
+      "implementation": "Use a parent div with 'relative overflow-hidden' and a child 'absolute inset-0' with a conic-gradient animation."
+    },
+    "grid_borders": {
+      "class": "border-r border-b border-white/5",
+      "usage": "Dashboard data cells, creating a 'Technical' look"
+    },
+    "buttons": {
+      "primary": "bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold uppercase tracking-widest hover:opacity-90 clip-path-polygon-[0_0,100%_0,100%_70%,90%_100%,0_100%]",
+      "secondary": "border border-[#14F195] text-[#14F195] hover:bg-[#14F195]/10 uppercase tracking-widest"
+    }
+  },
+  "layout_strategies": {
+    "landing_page": {
+      "grid": "Mode A: The Tetris Grid",
+      "classes": "grid grid-cols-1 md:grid-cols-12 gap-8 p-8",
+      "hero_section": "col-span-full md:col-span-8 row-span-2 relative overflow-hidden rounded-none border border-white/10",
+      "stats_section": "col-span-4 row-span-1 bg-white/5 backdrop-blur-md border border-white/10 p-6"
+    },
+    "dashboard": {
+      "grid": "Mode B: High Density Grid",
+      "classes": "grid grid-cols-1 md:grid-cols-4 gap-4 p-4 h-screen overflow-hidden",
+      "sidebar": "hidden md:flex col-span-1 flex-col border-r border-white/10 bg-black/50",
+      "main_view": "col-span-3 grid grid-cols-3 gap-4 overflow-y-auto"
+    }
+  },
+  "components": {
+    "charts": {
+      "library": "Recharts (via Shadcn)",
+      "style": "AreaChart with gradient fills. Stroke width 2px. No grid lines (or very subtle opacity 0.05).",
+      "colors": ["#14F195", "#9945FF", "#00F0FF"]
+    },
+    "tables": {
+      "style": "Compact, monospace font for numbers. Row hover: bg-white/5. Border-b border-white/5.",
+      "headers": "text-xs uppercase tracking-wider text-gray-500"
+    },
+    "toasts": {
+      "library": "Sonner",
+      "style": "Dark mode default, sharp corners"
+    }
+  },
+  "assets": {
+    "images": [
+      {
+        "category": "Hero Background",
+        "url": "https://images.unsplash.com/photo-1762279389006-43963a0cee55?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGJsb2NrY2hhaW4lMjBuZXR3b3JrJTIwZGFyayUyMG5lb258ZW58MHx8fHwxNzY5Nzg3MzQ5fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract neon lines on dark background. Use with overlay opacity-50."
+      },
+      {
+        "category": "Whale Tracking Panel",
+        "url": "https://images.unsplash.com/photo-1762279388956-1c098163a2a8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTJ8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMGJsb2NrY2hhaW4lMjBuZXR3b3JrJTIwZGFyayUyMG5lb258ZW58MHx8fHwxNzY5Nzg3MzQ5fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Digital landscape wireframe. Use as background for the 'Whale Watch' card."
+      },
+      {
+        "category": "Payment/Wallet",
+        "url": "https://images.pexels.com/photos/12915481/pexels-photo-12915481.jpeg",
+        "description": "Solana Coin 3D. Use in the payment modal or pricing section."
+      },
+      {
+        "category": "Bot Persona/Trust",
+        "url": "https://images.unsplash.com/photo-1580046939256-c377c5b099f1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzl8MHwxfHNlYXJjaHwzfHxjeWJlcnB1bmslMjBkaWdpdGFsJTIwc29sZGllciUyMGh1ZCUyMGludGVyZmFjZXxlbnwwfHx8fDE3Njk3ODczNDd8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Cyberpunk operative. Use in the 'About' or 'Security' section."
+      }
+    ],
+    "icons": "Lucide React (default). Use 'Activity', 'Crosshair', 'Zap', 'Shield', 'Wallet' icons."
+  },
+  "universal_guidelines": [
+    "DO NOT use gradients for text unless it's a massive headline.",
+    "DO NOT use rounded-xl or rounded-2xl. Stick to rounded-none, rounded-sm, or rounded-md for a 'military' feel.",
+    "ALWAYS add 'data-testid' to interactive elements.",
+    "Use 'backdrop-blur' heavily to create depth.",
+    "Animations: Use 'framer-motion' for entrance effects (staggerChildren).",
+    "React Files: Use .js extension (JSX syntax inside).",
+    "Export: Named exports for components, Default exports for pages."
+  ],
+  "instructions_to_main_agent": "1. Update index.css with the provided CSS variables. 2. Install 'framer-motion' and 'clsx' 'tailwind-merge'. 3. Create a 'Layout' component that handles the sidebar/header structure. 4. Build the Dashboard using the 'High Density Grid' strategy. 5. Build the Landing Page using the 'Tetris Grid' strategy."
+}
