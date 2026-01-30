@@ -18,6 +18,19 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 import threading
 import json
 
+# Import trading engine components
+from trading_engine import (
+    JupiterDEX, 
+    RugDetector, 
+    WhaleMonitor, 
+    AutoTrader,
+    TrendingTokenScanner,
+    TradeSignal,
+    WSOL_MINT,
+    MIN_PROFIT_USD,
+    MAX_TRADE_TIME_SECONDS
+)
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
