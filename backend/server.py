@@ -295,7 +295,7 @@ async def wallet_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /wallet command - show wallet info"""
     telegram_id = update.effective_user.id
     
-    wallets = await db.wallets.find(
+    wallets = await get_telegram_db().wallets.find(
         {"user_telegram_id": telegram_id, "is_active": True},
         {"_id": 0}
     ).to_list(10)
@@ -318,7 +318,7 @@ async def newwallet_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = update.effective_user.id
     
     # Check user credits/subscription
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    user = await get_telegram_db().users.find_one({"telegram_id": telegram_id}, {"_id": 0})
     if not user:
         await update.message.reply_text("❌ Please /start the bot first.")
         return
@@ -331,7 +331,7 @@ async def newwallet_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         public_key=public_key,
         private_key_encrypted=private_key  # In production, encrypt this!
     )
-    await db.wallets.insert_one(wallet.model_dump())
+    await get_telegram_db().wallets.insert_one(wallet.model_dump())
     
     # Send private key securely
     await update.message.reply_text(
@@ -359,8 +359,8 @@ async def balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /balance command"""
     telegram_id = update.effective_user.id
     
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
-    wallets = await db.wallets.find(
+    user = await get_telegram_db().users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    wallets = await get_telegram_db().wallets.find(
         {"user_telegram_id": telegram_id, "is_active": True},
         {"_id": 0}
     ).to_list(10)
@@ -374,7 +374,7 @@ async def balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     total_usd = total_sol * sol_price
     
     # Get trade stats
-    trades = await db.trades.find(
+    trades = await get_telegram_db().trades.find(
         {"user_telegram_id": telegram_id},
         {"_id": 0}
     ).to_list(1000)
@@ -422,7 +422,7 @@ async def setcredits_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
     
     # Find and update user
-    result = await db.users.update_one(
+    result = await get_telegram_db().users.update_one(
         {"username": target_username},
         {"$set": {"credits": amount}}
     )
@@ -431,7 +431,7 @@ async def setcredits_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.message.reply_text(f"✅ Set {amount} credits for @{target_username}")
         
         # Notify user
-        user = await db.users.find_one({"username": target_username}, {"_id": 0})
+        user = await get_telegram_db().users.find_one({"username": target_username}, {"_id": 0})
         if user:
             try:
                 bot = Bot(token=TELEGRAM_BOT_TOKEN)
@@ -559,13 +559,13 @@ async def autotrade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         stop_loss_pct = 0.50
     
     # Check user credits
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    user = await get_telegram_db().users.find_one({"telegram_id": telegram_id}, {"_id": 0})
     if not user or user.get('credits', 0) <= 0:
         await update.message.reply_text("❌ You need credits to enable auto-trading. Use /pay to buy access.")
         return
     
     # Get user's wallet
-    wallet = await db.wallets.find_one(
+    wallet = await get_telegram_db().wallets.find_one(
         {"user_telegram_id": telegram_id, "is_active": True},
         {"_id": 0}
     )
@@ -643,7 +643,7 @@ async def pnl_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = update.effective_user.id
     
     # Get user's trades from database
-    trades = await db.trades.find(
+    trades = await get_telegram_db().trades.find(
         {"user_telegram_id": telegram_id},
         {"_id": 0}
     ).sort("created_at", -1).to_list(100)
@@ -723,7 +723,7 @@ async def trades_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /trades command - show trade history"""
     telegram_id = update.effective_user.id
     
-    trades = await db.trades.find(
+    trades = await get_telegram_db().trades.find(
         {"user_telegram_id": telegram_id},
         {"_id": 0}
     ).sort("created_at", -1).to_list(20)
@@ -884,13 +884,13 @@ async def trade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     
     # Check user subscription/credits
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    user = await get_telegram_db().users.find_one({"telegram_id": telegram_id}, {"_id": 0})
     if not user or user.get('credits', 0) <= 0:
         await update.message.reply_text("❌ You need credits to trade. Use /pay to buy access.")
         return
     
     # Get user's wallet
-    wallet = await db.wallets.find_one(
+    wallet = await get_telegram_db().wallets.find_one(
         {"user_telegram_id": telegram_id, "is_active": True},
         {"_id": 0}
     )
@@ -953,7 +953,7 @@ async def trade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     amount_sol=amount_sol,
                     status="COMPLETED"
                 )
-                await db.trades.insert_one(trade_record.model_dump())
+                await get_telegram_db().trades.insert_one(trade_record.model_dump())
                 
                 await update.message.reply_text(
                     f"""
@@ -981,7 +981,7 @@ async def trade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 amount_sol=amount_sol,
                 status="SIMULATED"
             )
-            await db.trades.insert_one(trade_record.model_dump())
+            await get_telegram_db().trades.insert_one(trade_record.model_dump())
             
             await update.message.reply_text(
                 f"""
@@ -1000,7 +1000,7 @@ Fund wallet to enable live trades.
             )
         
         # Deduct credits
-        await db.users.update_one(
+        await get_telegram_db().users.update_one(
             {"telegram_id": telegram_id},
             {"$inc": {"credits": -1}}
         )
@@ -1013,7 +1013,7 @@ async def positions_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /positions command - show active positions"""
     telegram_id = update.effective_user.id
     
-    trades = await db.trades.find(
+    trades = await get_telegram_db().trades.find(
         {"user_telegram_id": telegram_id, "status": {"$in": ["PENDING", "ACTIVE", "SIMULATED"]}},
         {"_id": 0}
     ).to_list(20)
@@ -1044,7 +1044,7 @@ async def whale_activity_callback(activity: Dict):
         amount=activity.get('amount', 0),
         detected_at=datetime.now(timezone.utc).isoformat()
     )
-    await db.whale_activities.insert_one(whale_activity.model_dump())
+    await get_telegram_db().whale_activities.insert_one(whale_activity.model_dump())
     
     # Notify admin chat
     try:
@@ -1109,7 +1109,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             public_key=public_key,
             private_key_encrypted=private_key
         )
-        await db.wallets.insert_one(wallet.model_dump())
+        await get_telegram_db().wallets.insert_one(wallet.model_dump())
         
         await query.edit_message_text(
             f"""
@@ -1127,8 +1127,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     
     elif data == "balance":
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
-        wallets = await db.wallets.find(
+        user = await get_telegram_db().users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        wallets = await get_telegram_db().wallets.find(
             {"user_telegram_id": telegram_id, "is_active": True},
             {"_id": 0}
         ).to_list(10)
@@ -1164,7 +1164,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     
     elif data == "my_trades":
-        trades = await db.trades.find(
+        trades = await get_telegram_db().trades.find(
             {"user_telegram_id": telegram_id},
             {"_id": 0}
         ).to_list(10)
@@ -1266,7 +1266,7 @@ After payment, click "I've Paid".
             crypto_amount=0,
             status="PENDING_VERIFICATION"
         )
-        await db.payments.insert_one(payment.model_dump())
+        await get_telegram_db().payments.insert_one(payment.model_dump())
         
         # Notify admin
         try:
@@ -1317,7 +1317,7 @@ You'll receive a notification once verified.
     
     elif data == "delete_wallet":
         # Deactivate user's wallets
-        await db.wallets.update_many(
+        await get_telegram_db().wallets.update_many(
             {"user_telegram_id": telegram_id},
             {"$set": {"is_active": False}}
         )
@@ -1364,15 +1364,15 @@ async def root():
 @api_router.get("/stats", response_model=StatsResponse)
 async def get_stats():
     """Get overall bot statistics"""
-    total_users = await db.users.count_documents({})
-    active_wallets = await db.wallets.count_documents({"is_active": True})
-    total_trades = await db.trades.count_documents({})
+    total_users = await get_telegram_db().users.count_documents({})
+    active_wallets = await get_telegram_db().wallets.count_documents({"is_active": True})
+    total_trades = await get_telegram_db().trades.count_documents({})
     
-    trades = await db.trades.find({}, {"_id": 0, "profit_usd": 1}).to_list(10000)
+    trades = await get_telegram_db().trades.find({}, {"_id": 0, "profit_usd": 1}).to_list(10000)
     total_profit = sum(t.get('profit_usd', 0) for t in trades)
     
     today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-    whale_today = await db.whale_activities.count_documents({
+    whale_today = await get_telegram_db().whale_activities.count_documents({
         "detected_at": {"$gte": today.isoformat()}
     })
     
@@ -1387,22 +1387,22 @@ async def get_stats():
 @api_router.get("/users")
 async def get_users():
     """Get all users"""
-    users = await db.users.find({}, {"_id": 0}).to_list(1000)
+    users = await get_telegram_db().users.find({}, {"_id": 0}).to_list(1000)
     return {"users": users}
 
 @api_router.get("/users/{telegram_id}")
 async def get_user(telegram_id: int):
     """Get specific user"""
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    user = await get_telegram_db().users.find_one({"telegram_id": telegram_id}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    wallets = await db.wallets.find(
+    wallets = await get_telegram_db().wallets.find(
         {"user_telegram_id": telegram_id, "is_active": True},
         {"_id": 0}
     ).to_list(100)
     
-    trades = await db.trades.find(
+    trades = await get_telegram_db().trades.find(
         {"user_telegram_id": telegram_id},
         {"_id": 0}
     ).to_list(1000)
@@ -1422,7 +1422,7 @@ async def get_whales():
 @api_router.get("/whale-activities")
 async def get_whale_activities():
     """Get recent whale activities"""
-    activities = await db.whale_activities.find(
+    activities = await get_telegram_db().whale_activities.find(
         {},
         {"_id": 0}
     ).sort("detected_at", -1).to_list(100)
@@ -1431,13 +1431,13 @@ async def get_whale_activities():
 @api_router.get("/trades")
 async def get_trades():
     """Get all trades"""
-    trades = await db.trades.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    trades = await get_telegram_db().trades.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return {"trades": trades}
 
 @api_router.get("/payments")
 async def get_payments():
     """Get all payments"""
-    payments = await db.payments.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    payments = await get_telegram_db().payments.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
     return {"payments": payments}
 
 @api_router.get("/sol-price")
@@ -1449,7 +1449,7 @@ async def get_sol_price_endpoint():
 @api_router.post("/whale-activities")
 async def create_whale_activity(activity: WhaleActivityModel):
     """Record a whale activity"""
-    await db.whale_activities.insert_one(activity.model_dump())
+    await get_telegram_db().whale_activities.insert_one(activity.model_dump())
     return {"status": "created", "id": activity.id}
 
 class SetCreditsRequest(BaseModel):
@@ -1459,7 +1459,7 @@ class SetCreditsRequest(BaseModel):
 @api_router.post("/admin/set-credits")
 async def admin_set_credits(request: SetCreditsRequest):
     """Admin endpoint to set user credits"""
-    result = await db.users.update_one(
+    result = await get_telegram_db().users.update_one(
         {"telegram_id": request.telegram_id},
         {"$set": {"credits": request.credits}}
     )
@@ -1516,7 +1516,7 @@ class ExecuteTradeRequest(BaseModel):
 async def execute_trade_endpoint(request: ExecuteTradeRequest):
     """Execute a trade (admin/API use)"""
     # Get user's wallet
-    wallet = await db.wallets.find_one(
+    wallet = await get_telegram_db().wallets.find_one(
         {"user_telegram_id": request.user_telegram_id, "is_active": True},
         {"_id": 0}
     )
@@ -1532,7 +1532,7 @@ async def execute_trade_endpoint(request: ExecuteTradeRequest):
         amount_sol=request.amount_sol,
         status="QUEUED"
     )
-    await db.trades.insert_one(trade.model_dump())
+    await get_telegram_db().trades.insert_one(trade.model_dump())
     
     return {"status": "queued", "trade_id": trade.id}
 
@@ -1541,15 +1541,15 @@ async def get_trading_stats():
     """Get trading statistics"""
     today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     
-    total_trades = await db.trades.count_documents({})
-    trades_today = await db.trades.count_documents({"created_at": {"$gte": today.isoformat()}})
+    total_trades = await get_telegram_db().trades.count_documents({})
+    trades_today = await get_telegram_db().trades.count_documents({"created_at": {"$gte": today.isoformat()}})
     
-    all_trades = await db.trades.find({}, {"_id": 0, "profit_usd": 1, "status": 1}).to_list(10000)
+    all_trades = await get_telegram_db().trades.find({}, {"_id": 0, "profit_usd": 1, "status": 1}).to_list(10000)
     total_profit = sum(t.get('profit_usd', 0) for t in all_trades)
     completed = sum(1 for t in all_trades if t.get('status') == 'COMPLETED')
     failed = sum(1 for t in all_trades if t.get('status') == 'FAILED')
     
-    whale_activities_today = await db.whale_activities.count_documents({
+    whale_activities_today = await get_telegram_db().whale_activities.count_documents({
         "detected_at": {"$gte": today.isoformat()}
     })
     
@@ -1614,7 +1614,7 @@ async def get_pnl_stats():
 @api_router.get("/user-pnl/{telegram_id}")
 async def get_user_pnl(telegram_id: int):
     """Get P&L for a specific user"""
-    trades = await db.trades.find(
+    trades = await get_telegram_db().trades.find(
         {"user_telegram_id": telegram_id},
         {"_id": 0}
     ).to_list(1000)
