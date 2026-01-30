@@ -481,6 +481,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 *Trading Status:*
 Live Trading: {live_status}
 Auto-Trade on Whale: {auto_status}
+Min Trade: {MIN_TRADE_SOL} SOL
+Default Stop-Loss: {DEFAULT_STOP_LOSS_PCT*100:.0f}%
 
 *User Commands:*
 /start - Start the bot
@@ -491,15 +493,22 @@ Auto-Trade on Whale: {auto_status}
 /trending - See trending tokens
 /rugcheck \<token\> - Check token safety
 /trade \<token\> \<amount\> - Execute trade
-/autotrade \<amount\> - Enable auto-trading
+
+*Auto-Trading:*
+/autotrade \<sol\> \<stoploss%\> - Enable auto-trade
 /stopautotrade - Disable auto-trading
+/stoploss \<percent\> - Set stop-loss %
 /positions - View active positions
+/pnl - View P&L report
+/trades - Trade history
+
+*Other:*
 /pay - Buy daily access
+/status - System status
 /help - Show this help
 
 *Admin Commands:*
 /setcredits @user amount - Set user credits
-/broadcast \<message\> - Send to all users
 
 *Support:* Contact @memecorpofficial
 """
