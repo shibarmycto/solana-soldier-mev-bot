@@ -323,15 +323,24 @@ const Dashboard = () => {
   const [solPrice, setSolPrice] = useState(0);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+  const [trendingTokens, setTrendingTokens] = useState([]);
+  const [whaleActivities, setWhaleActivities] = useState([]);
+  const [tradingStats, setTradingStats] = useState(null);
+  const [rugCheckAddress, setRugCheckAddress] = useState("");
+  const [rugCheckResult, setRugCheckResult] = useState(null);
+  const [checkingRug, setCheckingRug] = useState(false);
   
   const fetchData = async () => {
     try {
-      const [statsRes, usersRes, tradesRes, paymentsRes, priceRes] = await Promise.all([
+      const [statsRes, usersRes, tradesRes, paymentsRes, priceRes, trendingRes, whaleRes, tradingRes] = await Promise.all([
         axios.get(`${API}/stats`),
         axios.get(`${API}/users`),
         axios.get(`${API}/trades`),
         axios.get(`${API}/payments`),
-        axios.get(`${API}/sol-price`)
+        axios.get(`${API}/sol-price`),
+        axios.get(`${API}/trending-tokens`).catch(() => ({ data: { tokens: [] } })),
+        axios.get(`${API}/whale-activities`).catch(() => ({ data: { activities: [] } })),
+        axios.get(`${API}/trading-stats`).catch(() => ({ data: {} }))
       ]);
       
       setStats(statsRes.data);
@@ -339,11 +348,28 @@ const Dashboard = () => {
       setTrades(tradesRes.data.trades || []);
       setPayments(paymentsRes.data.payments || []);
       setSolPrice(priceRes.data.price_usd || 0);
+      setTrendingTokens(trendingRes.data.tokens || []);
+      setWhaleActivities(whaleRes.data.activities || []);
+      setTradingStats(tradingRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to fetch data");
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const performRugCheck = async () => {
+    if (!rugCheckAddress) return;
+    setCheckingRug(true);
+    try {
+      const res = await axios.post(`${API}/rugcheck/${rugCheckAddress}`);
+      setRugCheckResult(res.data);
+      toast.success("Rug check complete!");
+    } catch (error) {
+      toast.error("Rug check failed");
+    } finally {
+      setCheckingRug(false);
     }
   };
   
@@ -391,7 +417,7 @@ const Dashboard = () => {
       </div>
       
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <StatCard
           icon={Users}
           label="Total Users"
@@ -420,15 +446,22 @@ const Dashboard = () => {
           color="bg-[#FF9500]/20 text-[#FF9500]"
           delay={0.3}
         />
+        <StatCard
+          icon={Eye}
+          label="Whale Alerts"
+          value={stats?.whale_activities_today || 0}
+          color="bg-[#FF3B30]/20 text-[#FF3B30]"
+          delay={0.4}
+        />
       </div>
       
       {/* Tabs */}
-      <div className="flex gap-4 mb-6 border-b border-white/10 pb-4">
-        {["overview", "users", "trades", "payments"].map((tab) => (
+      <div className="flex gap-4 mb-6 border-b border-white/10 pb-4 overflow-x-auto">
+        {["overview", "trending", "rugcheck", "whales", "trades", "users", "payments"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 font-rajdhani font-semibold uppercase tracking-wider transition-all ${
+            className={`px-4 py-2 font-rajdhani font-semibold uppercase tracking-wider transition-all whitespace-nowrap ${
               activeTab === tab
                 ? "text-[#14F195] border-b-2 border-[#14F195]"
                 : "text-gray-400 hover:text-white"
