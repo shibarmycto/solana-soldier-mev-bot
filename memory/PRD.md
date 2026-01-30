@@ -8,6 +8,8 @@ Create a Telegram bot called "Solana Soldier" for Solana cryptocurrency arbitrag
 - Has admin credit system with /setcredits command
 - Users pay £100/day via crypto (SOL, ETH, BTC)
 - Reports trades via Telegram with easy button UI
+- Integrates with Jupiter DEX for swaps
+- Implements rug detection algorithm
 
 ## User Personas
 1. **Crypto Trader** - Wants automated arbitrage trading without manual monitoring
@@ -21,9 +23,13 @@ Create a Telegram bot called "Solana Soldier" for Solana cryptocurrency arbitrag
 - Credit system for user access
 - Payment verification system (SOL/ETH/BTC)
 - Web dashboard for monitoring
+- Jupiter DEX integration for trades
+- Rug detection algorithm
+- Automated trading logic
 
-## What's Been Implemented (2026-01-30)
-### Backend (FastAPI)
+## What's Been Implemented
+
+### Phase 1 (2026-01-30)
 - ✅ Telegram bot with commands: /start, /wallet, /newwallet, /balance, /setcredits, /whales, /pay, /help
 - ✅ Inline keyboard buttons for navigation
 - ✅ Solana wallet creation with private key generation
@@ -31,50 +37,71 @@ Create a Telegram bot called "Solana Soldier" for Solana cryptocurrency arbitrag
 - ✅ API endpoints for stats, users, trades, payments, whales, SOL price
 - ✅ Admin credit management system
 - ✅ Payment request flow with admin notification
+- ✅ Landing page and dashboard
 
-### Frontend (React)
-- ✅ Landing page with branding and features
-- ✅ Dashboard with stats cards and tabs
-- ✅ Whale wallet display
-- ✅ Pricing section with payment options
-- ✅ Real-time SOL price display
+### Phase 2 (2026-01-30)
+- ✅ **Jupiter DEX Integration** - JupiterDEX class with quote, swap transaction, and execution methods
+- ✅ **Rug Detection Algorithm** - RugDetector class checking:
+  - Low liquidity (<$5,000)
+  - High creator holdings (>50%)
+  - Low holder count (<50)
+  - Token age (<24 hours)
+  - Mint/freeze authority enabled
+  - Top holder concentration (>80%)
+  - Known rugger addresses
+- ✅ **Whale Monitor** - WhaleMonitor class with real-time polling
+- ✅ **Auto Trader** - AutoTrader class with:
+  - Signal processing from whale activity
+  - Confidence calculation
+  - Position management
+  - Exit monitoring
+- ✅ **Trending Token Scanner** - TrendingTokenScanner using DexScreener API
+- ✅ **New Telegram Commands**: /trending, /rugcheck, /trade, /positions
+- ✅ **New API Endpoints**: /trending-tokens, /new-pairs, /rugcheck, /trading-stats, /execute-trade
+- ✅ **Dashboard Updates**: New tabs for Trending, Rugcheck, Whales, Trading Engine stats
 
-### Integrations
-- ✅ Telegram Bot API (python-telegram-bot 21.0)
-- ✅ Solscan API for whale tracking
-- ✅ CoinGecko API for SOL price
-- ✅ MongoDB for data storage
+## Architecture
+```
+/app/backend/
+├── server.py           # FastAPI + Telegram bot
+├── trading_engine.py   # Jupiter DEX, Rug Detection, Whale Monitor, Auto Trader
+└── .env               # Configuration
+
+/app/frontend/
+└── src/App.js         # React dashboard with 7 tabs
+```
 
 ## Prioritized Backlog
-### P0 (Critical)
-- [ ] Implement actual trading execution logic
-- [ ] Connect to Solana DEX (Raydium/Jupiter) for trades
-- [ ] Real-time whale transaction monitoring
+### P0 (Completed)
+- [x] Jupiter DEX integration
+- [x] Rug detection algorithm
+- [x] Whale monitoring
+- [x] Automated trading logic
 
-### P1 (High Priority)
-- [ ] Automated trade execution based on whale activity
-- [ ] Profit calculation and tracking
-- [ ] Gas fee estimation and management
-- [ ] Token burn detection
+### P1 (Next)
+- [ ] Live trade execution with actual funds
+- [ ] Helius RPC integration for faster queries
+- [ ] Real-time websocket whale monitoring
+- [ ] Profit tracking per position
 
-### P2 (Medium Priority)
-- [ ] PumpFun trending token integration
+### P2 (Future)
+- [ ] PumpFun API integration
 - [ ] Trade history export
-- [ ] Performance analytics dashboard
+- [ ] Performance analytics charts
 - [ ] Multi-wallet support per user
-
-## Next Tasks
-1. Integrate Jupiter/Raydium DEX API for actual trades
-2. Implement real-time whale transaction websocket monitoring
-3. Add automated trade execution logic with profit targets
-4. Build rug detection algorithm
-5. Add Helius RPC for faster blockchain queries
 
 ## Configuration
 - Admin: @memecorpofficial
 - Admin Chat: -4993252670
 - Daily Access: £100
+- Profit Target: $2/trade
+- Max Trade Time: 120 seconds
 - Payment Addresses:
   - SOL: TXFm5oQQ4Qp51tMkPgdqSESYdQaN6hqQkpoZidWMdSy
   - ETH: 0x125FeD6C4A538aaD4108cE5D598628DC42635Fe9
   - BTC: bc1p3red8wgfa9k2qyhxxj9vpnehvy29ld63lg5t6kfvrcy6lz7l9mhspyjk3k
+
+## Notes
+- Solscan API returns 401 - may need API key renewal
+- DexScreener API used as fallback for trending tokens
+- Jupiter DEX swaps are SIMULATED for safety - real execution requires wallet funding
