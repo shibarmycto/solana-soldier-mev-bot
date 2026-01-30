@@ -1577,6 +1577,43 @@ async def get_wallet_balance(address: str):
     balance = await helius_rpc.get_balance(address)
     return {"address": address, "balance_sol": balance}
 
+@api_router.get("/pnl-stats")
+async def get_pnl_stats():
+    """Get overall P&L statistics"""
+    if auto_trader:
+        stats = await auto_trader.get_pnl_stats()
+        return stats
+    return {
+        "total_pnl_usd": 0,
+        "total_trades": 0,
+        "winning_trades": 0,
+        "losing_trades": 0,
+        "win_rate": 0,
+        "active_positions": 0
+    }
+
+@api_router.get("/user-pnl/{telegram_id}")
+async def get_user_pnl(telegram_id: int):
+    """Get P&L for a specific user"""
+    trades = await db.trades.find(
+        {"user_telegram_id": telegram_id},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    total_pnl = sum(t.get('pnl_usd', 0) for t in trades)
+    total_trades = len(trades)
+    winning = sum(1 for t in trades if t.get('pnl_usd', 0) > 0)
+    losing = sum(1 for t in trades if t.get('pnl_usd', 0) < 0)
+    
+    return {
+        "telegram_id": telegram_id,
+        "total_pnl_usd": total_pnl,
+        "total_trades": total_trades,
+        "winning_trades": winning,
+        "losing_trades": losing,
+        "win_rate": (winning / total_trades * 100) if total_trades else 0
+    }
+
 # Include router
 app.include_router(api_router)
 
