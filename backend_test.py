@@ -367,7 +367,8 @@ class SolanaSoldierAPITester:
         critical_tests = [
             "Root API Status", "Stats Endpoint", "Whales Endpoint", 
             "SOL Price Endpoint", "Users Endpoint", "Trades Endpoint", 
-            "Payments Endpoint", "Trading Stats Endpoint", "Rugcheck Endpoint"
+            "Payments Endpoint", "Trading Stats Endpoint", "Rugcheck Endpoint",
+            "System Status Endpoint", "Wallet Balance Endpoint"
         ]
         
         critical_passed = sum(1 for result in self.test_results 
