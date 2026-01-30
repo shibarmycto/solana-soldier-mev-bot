@@ -35,7 +35,9 @@ from trading_engine import (
     LIVE_TRADING_ENABLED,
     AUTO_TRADE_ON_WHALE_SIGNAL,
     LAMPORTS_PER_SOL,
-    MAX_TRADE_SOL
+    MAX_TRADE_SOL,
+    MIN_TRADE_SOL,
+    DEFAULT_STOP_LOSS_PCT
 )
 
 ROOT_DIR = Path(__file__).parent
