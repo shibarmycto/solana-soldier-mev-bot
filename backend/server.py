@@ -467,15 +467,249 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 /newwallet - Create new wallet
 /balance - Check your balance
 /whales - View tracked whales
+/trending - See trending tokens
+/rugcheck \<token\> - Check token safety
+/trade \<token\> \<amount\> - Execute trade
+/positions - View active positions
 /pay - Buy daily access
 /help - Show this help
 
 *Admin Commands:*
 /setcredits @user amount - Set user credits
+/broadcast \<message\> - Send to all users
 
 *Support:* Contact @memecorpofficial
 """
     await update.message.reply_text(help_text, parse_mode='Markdown')
+
+async def trending_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /trending command - show trending tokens"""
+    await update.message.reply_text("🔍 Scanning for trending tokens...")
+    
+    try:
+        if trending_scanner:
+            tokens = await trending_scanner.get_trending_tokens()
+            
+            if tokens:
+                text = "🔥 *TRENDING TOKENS* 🔥\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+                for i, t in enumerate(tokens[:10], 1):
+                    price_change = t.get('price_change_24h', 0)
+                    emoji = "🟢" if price_change > 0 else "🔴"
+                    text += f"{i}. *{t['symbol']}* {emoji}\n"
+                    text += f"   💲 ${t['price_usd']:.6f}\n"
+                    text += f"   📈 {price_change:+.2f}%\n"
+                    text += f"   💧 ${t['liquidity_usd']:,.0f}\n\n"
+                
+                text += "_Use /rugcheck <address> to check safety_"
+                await update.message.reply_text(text, parse_mode='Markdown')
+            else:
+                await update.message.reply_text("❌ No trending tokens found")
+        else:
+            await update.message.reply_text("❌ Trending scanner not initialized")
+    except Exception as e:
+        logger.error(f"Trending command error: {e}")
+        await update.message.reply_text(f"❌ Error: {str(e)[:100]}")
+
+async def rugcheck_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /rugcheck command - check token safety"""
+    args = context.args
+    if not args:
+        await update.message.reply_text("Usage: /rugcheck <token_address>")
+        return
+    
+    token_address = args[0]
+    await update.message.reply_text(f"🔍 Checking token safety...\n`{token_address[:20]}...`", parse_mode='Markdown')
+    
+    try:
+        if rug_detector:
+            result = await rug_detector.check_token(token_address)
+            
+            safety_emoji = "✅" if result.is_safe else "⚠️"
+            risk_bar = "🟢" * int((1 - result.risk_score) * 5) + "🔴" * int(result.risk_score * 5)
+            
+            text = f"""
+{safety_emoji} *RUG CHECK RESULT* {safety_emoji}
+━━━━━━━━━━━━━━━━━━━━━
+
+*Token:* `{token_address[:20]}...`
+*Status:* {'SAFE' if result.is_safe else 'RISKY'}
+*Risk Score:* {result.risk_score:.0%} {risk_bar}
+
+"""
+            if result.warnings:
+                text += "*⚠️ Warnings:*\n"
+                for w in result.warnings[:5]:
+                    text += f"• {w}\n"
+            
+            details = result.details
+            if details:
+                text += f"\n*📊 Details:*\n"
+                if 'liquidity_usd' in details:
+                    text += f"• Liquidity: ${details['liquidity_usd']:,.2f}\n"
+                if 'holder_count' in details:
+                    text += f"• Holders: {details['holder_count']}\n"
+                if 'creator_holdings_pct' in details:
+                    text += f"• Creator Holdings: {details['creator_holdings_pct']*100:.1f}%\n"
+                if 'age_hours' in details:
+                    text += f"• Age: {details['age_hours']:.1f} hours\n"
+            
+            await update.message.reply_text(text, parse_mode='Markdown')
+        else:
+            await update.message.reply_text("❌ Rug detector not initialized")
+    except Exception as e:
+        logger.error(f"Rugcheck error: {e}")
+        await update.message.reply_text(f"❌ Error checking token: {str(e)[:100]}")
+
+async def trade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /trade command - execute a trade"""
+    telegram_id = update.effective_user.id
+    args = context.args
+    
+    if len(args) < 2:
+        await update.message.reply_text("Usage: /trade <token_address> <amount_sol>")
+        return
+    
+    token_address = args[0]
+    try:
+        amount_sol = float(args[1])
+    except ValueError:
+        await update.message.reply_text("❌ Invalid amount")
+        return
+    
+    # Check user subscription/credits
+    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    if not user or user.get('credits', 0) <= 0:
+        await update.message.reply_text("❌ You need credits to trade. Use /pay to buy access.")
+        return
+    
+    # Get user's wallet
+    wallet = await db.wallets.find_one(
+        {"user_telegram_id": telegram_id, "is_active": True},
+        {"_id": 0}
+    )
+    if not wallet:
+        await update.message.reply_text("❌ No wallet found. Use /newwallet to create one.")
+        return
+    
+    await update.message.reply_text(f"⏳ Processing trade...\n\nToken: `{token_address[:20]}...`\nAmount: {amount_sol} SOL", parse_mode='Markdown')
+    
+    try:
+        # First, rug check
+        if rug_detector:
+            rug_result = await rug_detector.check_token(token_address)
+            if not rug_result.is_safe:
+                warnings_text = "\n".join(f"• {w}" for w in rug_result.warnings[:3])
+                await update.message.reply_text(
+                    f"⚠️ *TRADE BLOCKED - RUG RISK*\n\nRisk Score: {rug_result.risk_score:.0%}\n\n{warnings_text}",
+                    parse_mode='Markdown'
+                )
+                return
+        
+        # Create trade signal
+        signal = TradeSignal(
+            token_address=token_address,
+            token_symbol="TOKEN",
+            action="BUY",
+            reason="Manual trade",
+            confidence=0.8,
+            risk_score=rug_result.risk_score if rug_result else 0
+        )
+        
+        # Execute via Jupiter (simulated for safety)
+        trade_record = TradeModel(
+            user_telegram_id=telegram_id,
+            wallet_public_key=wallet['public_key'],
+            token_address=token_address,
+            trade_type="BUY",
+            amount_sol=amount_sol,
+            status="SIMULATED"  # Change to PENDING for real trades
+        )
+        await db.trades.insert_one(trade_record.model_dump())
+        
+        # Deduct credits
+        await db.users.update_one(
+            {"telegram_id": telegram_id},
+            {"$inc": {"credits": -1}}
+        )
+        
+        await update.message.reply_text(
+            f"""
+✅ *TRADE QUEUED* ✅
+━━━━━━━━━━━━━━━━━━━━━
+
+*Trade ID:* `{trade_record.id[:8]}...`
+*Token:* `{token_address[:16]}...`
+*Amount:* {amount_sol} SOL
+*Status:* SIMULATED
+
+⚠️ Real trading requires wallet funding.
+Use /positions to view active trades.
+""",
+            parse_mode='Markdown'
+        )
+        
+    except Exception as e:
+        logger.error(f"Trade error: {e}")
+        await update.message.reply_text(f"❌ Trade failed: {str(e)[:100]}")
+
+async def positions_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /positions command - show active positions"""
+    telegram_id = update.effective_user.id
+    
+    trades = await db.trades.find(
+        {"user_telegram_id": telegram_id, "status": {"$in": ["PENDING", "ACTIVE", "SIMULATED"]}},
+        {"_id": 0}
+    ).to_list(20)
+    
+    if not trades:
+        await update.message.reply_text("📊 No active positions.\n\nUse /trade <token> <amount> to open one.")
+        return
+    
+    text = "📊 *ACTIVE POSITIONS* 📊\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+    for t in trades:
+        text += f"*{t['trade_type']}* `{t['token_address'][:12]}...`\n"
+        text += f"  Amount: {t['amount_sol']:.4f} SOL\n"
+        text += f"  Status: {t['status']}\n"
+        text += f"  Time: {t['created_at'][:16]}\n\n"
+    
+    await update.message.reply_text(text, parse_mode='Markdown')
+
+async def whale_activity_callback(activity: Dict):
+    """Callback when whale activity is detected"""
+    logger.info(f"Whale activity detected: {activity}")
+    
+    # Store in database
+    whale_activity = WhaleActivityModel(
+        whale_address=activity['whale_address'],
+        token_address=activity.get('token_address', ''),
+        token_symbol=activity.get('token_symbol', 'UNKNOWN'),
+        action=activity.get('action', 'UNKNOWN'),
+        amount=activity.get('amount', 0),
+        detected_at=datetime.now(timezone.utc).isoformat()
+    )
+    await db.whale_activities.insert_one(whale_activity.model_dump())
+    
+    # Notify admin chat
+    try:
+        bot = Bot(token=TELEGRAM_BOT_TOKEN)
+        text = f"""
+🐋 *WHALE ALERT* 🐋
+
+*Wallet:* `{activity['whale_address'][:12]}...`
+*Action:* {activity.get('action', 'UNKNOWN')}
+*Token:* {activity.get('token_symbol', 'UNKNOWN')}
+*Amount:* {activity.get('amount', 0):.4f}
+
+[View on Solscan](https://solscan.io/tx/{activity.get('signature', '')})
+"""
+        await bot.send_message(
+            chat_id=ADMIN_CHAT_ID,
+            text=text,
+            parse_mode='Markdown',
+            disable_web_page_preview=True
+        )
+    except Exception as e:
+        logger.error(f"Failed to notify whale activity: {e}")
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle button callbacks"""
