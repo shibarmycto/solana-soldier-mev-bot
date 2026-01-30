@@ -1,1 +1,1 @@
-web: python cf-agent-bot.py
+worker: python solana_soldier_mev_bot.py
