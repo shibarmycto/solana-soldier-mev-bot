@@ -22,13 +22,20 @@ import json
 from trading_engine import (
     JupiterDEX, 
     RugDetector, 
-    WhaleMonitor, 
-    AutoTrader,
+    HeliusRPC,
+    HeliusWebSocket,
+    WhaleMonitorWebSocket,
+    LiveAutoTrader,
     TrendingTokenScanner,
     TradeSignal,
+    TradeResult,
     WSOL_MINT,
     MIN_PROFIT_USD,
-    MAX_TRADE_TIME_SECONDS
+    MAX_TRADE_TIME_SECONDS,
+    LIVE_TRADING_ENABLED,
+    AUTO_TRADE_ON_WHALE_SIGNAL,
+    LAMPORTS_PER_SOL,
+    MAX_TRADE_SOL
 )
 
 ROOT_DIR = Path(__file__).parent
@@ -39,9 +46,10 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Telegram Bot Token
+# Configuration
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 SOLSCAN_API_KEY = os.environ.get('SOLSCAN_API_KEY', '')
+HELIUS_API_KEY = os.environ.get('HELIUS_API_KEY', '')
 ADMIN_CHAT_ID = os.environ.get('ADMIN_CHAT_ID', '')
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', '@memecorpofficial')
 PAYMENT_SOL_ADDRESS = os.environ.get('PAYMENT_SOL_ADDRESS', '')
