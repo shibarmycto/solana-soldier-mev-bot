@@ -417,6 +417,11 @@ class SolanaSoldierAPITester:
         self.test_wallet_balance_endpoint()
         self.test_trading_stats_phase3()
         
+        # Phase 4 endpoints and features
+        self.test_pnl_stats_endpoint()
+        self.test_system_status_phase4()
+        self.test_trading_stats_phase4()
+        
         # Print summary
         print("=" * 60)
         print(f"📊 TEST SUMMARY")
