@@ -921,7 +921,7 @@ class WhaleMonitorWebSocket:
 
 
 class LiveAutoTrader:
-    """Automated live trading on whale signals"""
+    """Automated live trading on whale signals with P&L tracking and stop-loss"""
     
     def __init__(
         self,
@@ -931,7 +931,9 @@ class LiveAutoTrader:
         db,
         telegram_notify: Callable = None,
         min_profit_usd: float = MIN_PROFIT_USD,
-        max_trade_sol: float = MAX_TRADE_SOL
+        max_trade_sol: float = MAX_TRADE_SOL,
+        min_trade_sol: float = MIN_TRADE_SOL,
+        default_stop_loss_pct: float = DEFAULT_STOP_LOSS_PCT
     ):
         self.jupiter = jupiter
         self.rug_detector = rug_detector
@@ -940,19 +942,26 @@ class LiveAutoTrader:
         self.telegram_notify = telegram_notify
         self.min_profit_usd = min_profit_usd
         self.max_trade_sol = max_trade_sol
+        self.min_trade_sol = min_trade_sol
+        self.default_stop_loss_pct = default_stop_loss_pct
         self.active_positions: Dict[str, Dict] = {}
         self.is_enabled = LIVE_TRADING_ENABLED and AUTO_TRADE_ON_WHALE_SIGNAL
+        
+        # P&L tracking
+        self.total_pnl_usd: float = 0.0
+        self.total_trades: int = 0
+        self.winning_trades: int = 0
+        self.losing_trades: int = 0
     
     async def process_whale_signal(
         self,
         activity: Dict,
         user_keypair: Keypair,
         user_telegram_id: int,
-        trade_amount_sol: float
+        trade_amount_sol: float,
+        stop_loss_pct: float = None
     ) -> Optional[TradeResult]:
-        """
-        Process whale activity and execute trade if conditions met
-        """
+        """Process whale activity and execute trade if conditions met"""
         if not self.is_enabled:
             logger.info("Live trading disabled, skipping whale signal")
             return None
@@ -968,6 +977,10 @@ class LiveAutoTrader:
         # Skip WSOL/USDC
         if token_address in [WSOL_MINT, USDC_MINT]:
             return None
+        
+        # Enforce minimum trade
+        if trade_amount_sol < self.min_trade_sol:
+            trade_amount_sol = self.min_trade_sol
         
         logger.info(f"[AUTO-TRADE] Processing whale signal for {token_address[:8]}...")
         
@@ -999,15 +1012,20 @@ class LiveAutoTrader:
                 )
             return None
         
-        # Step 4: Enforce max trade limit
-        actual_trade_amount = min(trade_amount_sol, self.max_trade_sol)
+        # Step 4: Enforce trade limits
+        actual_trade_amount = max(self.min_trade_sol, min(trade_amount_sol, self.max_trade_sol))
         amount_lamports = int(actual_trade_amount * LAMPORTS_PER_SOL)
+        
+        # Get entry price for P&L tracking
+        entry_price = await self.jupiter.get_token_price(token_address)
+        sol_price = await self.jupiter.get_token_price(WSOL_MINT) or 200
+        entry_value_usd = actual_trade_amount * sol_price
         
         # Step 5: Notify user trade is starting
         if self.telegram_notify:
             await self.telegram_notify(
                 user_telegram_id,
-                f"🚀 *EXECUTING TRADE*\n\nWhale detected buying!\nToken: `{token_address[:16]}...`\nAmount: {actual_trade_amount:.4f} SOL\n\nProcessing..."
+                f"🚀 *EXECUTING TRADE*\n\nWhale detected buying!\nToken: `{token_address[:16]}...`\nAmount: {actual_trade_amount:.4f} SOL (~${entry_value_usd:.2f})\nStop-Loss: {(stop_loss_pct or self.default_stop_loss_pct)*100:.0f}%\n\nProcessing..."
             )
         
         # Step 6: Execute trade
@@ -1018,6 +1036,264 @@ class LiveAutoTrader:
             amount_lamports=amount_lamports,
             slippage_bps=MAX_SLIPPAGE_BPS
         )
+        
+        # Step 7: Record and monitor position
+        if result.success:
+            position = {
+                "trade_id": result.trade_id,
+                "user_telegram_id": user_telegram_id,
+                "keypair": user_keypair,
+                "entry_time": datetime.now(timezone.utc),
+                "entry_signature": result.signature,
+                "amount_sol": actual_trade_amount,
+                "amount_tokens": result.amount_tokens,
+                "token_address": token_address,
+                "entry_price": entry_price,
+                "entry_value_usd": entry_value_usd,
+                "stop_loss_pct": stop_loss_pct or self.default_stop_loss_pct,
+                "highest_value_usd": entry_value_usd,
+                "current_pnl_usd": 0.0
+            }
+            self.active_positions[token_address] = position
+            
+            # Save to database
+            await self._save_trade_to_db(position, "OPEN", result.signature)
+            
+            # Start exit monitor with stop-loss
+            asyncio.create_task(self._monitor_for_exit(token_address))
+            
+            if self.telegram_notify:
+                await self.telegram_notify(
+                    user_telegram_id,
+                    f"✅ *TRADE EXECUTED*\n\nSignature: `{result.signature[:20]}...`\nToken: `{token_address[:16]}...`\nAmount: {actual_trade_amount:.4f} SOL\nEntry Value: ${entry_value_usd:.2f}\nStop-Loss: {(stop_loss_pct or self.default_stop_loss_pct)*100:.0f}%\n\n[View on Solscan](https://solscan.io/tx/{result.signature})"
+                )
+            
+            logger.info(f"[AUTO-TRADE] ✅ Trade successful: {result.signature}")
+        else:
+            if self.telegram_notify:
+                await self.telegram_notify(
+                    user_telegram_id,
+                    f"❌ *TRADE FAILED*\n\nError: {result.error}\n\nPlease check your wallet balance and try again."
+                )
+            logger.error(f"[AUTO-TRADE] ❌ Trade failed: {result.error}")
+        
+        return result
+    
+    async def _save_trade_to_db(self, position: Dict, status: str, signature: str = None, exit_signature: str = None, pnl_usd: float = 0.0):
+        """Save trade record to database"""
+        try:
+            trade_record = {
+                "id": position["trade_id"],
+                "user_telegram_id": position["user_telegram_id"],
+                "wallet_public_key": str(position["keypair"].pubkey()),
+                "token_address": position["token_address"],
+                "trade_type": "BUY",
+                "amount_sol": position["amount_sol"],
+                "amount_tokens": position.get("amount_tokens", 0),
+                "entry_price": position.get("entry_price", 0),
+                "entry_value_usd": position.get("entry_value_usd", 0),
+                "exit_value_usd": position.get("exit_value_usd", 0),
+                "pnl_usd": pnl_usd,
+                "pnl_pct": (pnl_usd / position.get("entry_value_usd", 1)) * 100 if position.get("entry_value_usd") else 0,
+                "status": status,
+                "entry_signature": signature,
+                "exit_signature": exit_signature,
+                "stop_loss_pct": position.get("stop_loss_pct", self.default_stop_loss_pct),
+                "created_at": position["entry_time"].isoformat(),
+                "closed_at": datetime.now(timezone.utc).isoformat() if status == "CLOSED" else None
+            }
+            
+            # Upsert trade record
+            await self.db.trades.update_one(
+                {"id": position["trade_id"]},
+                {"$set": trade_record},
+                upsert=True
+            )
+        except Exception as e:
+            logger.error(f"Save trade error: {e}")
+    
+    async def _monitor_for_exit(self, token_address: str):
+        """Monitor position for profit target or stop-loss exit"""
+        position = self.active_positions.get(token_address)
+        if not position:
+            return
+        
+        entry_time = position["entry_time"]
+        user_telegram_id = position["user_telegram_id"]
+        keypair = position["keypair"]
+        entry_value_usd = position["entry_value_usd"]
+        stop_loss_pct = position["stop_loss_pct"]
+        stop_loss_value = entry_value_usd * (1 - stop_loss_pct)
+        
+        logger.info(f"[AUTO-TRADE] Monitoring position: {token_address[:8]}... Entry: ${entry_value_usd:.2f}, Stop-Loss: ${stop_loss_value:.2f}")
+        
+        check_count = 0
+        while token_address in self.active_positions:
+            try:
+                check_count += 1
+                elapsed = (datetime.now(timezone.utc) - entry_time).total_seconds()
+                
+                # Get current token price
+                current_price = await self.jupiter.get_token_price(token_address)
+                sol_price = await self.jupiter.get_token_price(WSOL_MINT) or 200
+                
+                if current_price and position.get("amount_tokens"):
+                    # Calculate current value and P&L
+                    current_value_usd = position["amount_tokens"] * current_price
+                    pnl_usd = current_value_usd - entry_value_usd
+                    pnl_pct = (pnl_usd / entry_value_usd) * 100
+                    
+                    # Update position tracking
+                    position["current_pnl_usd"] = pnl_usd
+                    if current_value_usd > position["highest_value_usd"]:
+                        position["highest_value_usd"] = current_value_usd
+                    
+                    # Log every 6th check (~30 seconds)
+                    if check_count % 6 == 0:
+                        logger.info(f"[POSITION] {token_address[:8]}... Value: ${current_value_usd:.2f}, P&L: ${pnl_usd:.2f} ({pnl_pct:.1f}%)")
+                    
+                    # CHECK 1: Stop-Loss triggered
+                    if current_value_usd <= stop_loss_value:
+                        logger.warning(f"[AUTO-TRADE] 🛑 STOP-LOSS TRIGGERED! Value: ${current_value_usd:.2f} <= ${stop_loss_value:.2f}")
+                        await self._execute_exit(token_address, f"STOP_LOSS ({pnl_pct:.1f}%)", pnl_usd)
+                        break
+                    
+                    # CHECK 2: Profit target reached
+                    if pnl_usd >= self.min_profit_usd:
+                        logger.info(f"[AUTO-TRADE] 💰 PROFIT TARGET! P&L: ${pnl_usd:.2f}")
+                        await self._execute_exit(token_address, f"PROFIT_TARGET (+${pnl_usd:.2f})", pnl_usd)
+                        break
+                    
+                    # CHECK 3: Timeout
+                    if elapsed > MAX_TRADE_TIME_SECONDS:
+                        logger.info(f"[AUTO-TRADE] ⏰ TIMEOUT after {elapsed:.0f}s, P&L: ${pnl_usd:.2f}")
+                        await self._execute_exit(token_address, f"TIMEOUT ({pnl_pct:.1f}%)", pnl_usd)
+                        break
+                
+                await asyncio.sleep(5)  # Check every 5 seconds
+                
+            except Exception as e:
+                logger.error(f"[AUTO-TRADE] Monitor error: {e}")
+                await asyncio.sleep(5)
+    
+    async def _execute_exit(self, token_address: str, reason: str, pnl_usd: float = 0.0):
+        """Exit position by selling tokens"""
+        position = self.active_positions.pop(token_address, None)
+        if not position:
+            return
+        
+        user_telegram_id = position["user_telegram_id"]
+        keypair = position["keypair"]
+        amount_tokens = int(position.get("amount_tokens", 0))
+        entry_value_usd = position.get("entry_value_usd", 0)
+        
+        if amount_tokens <= 0:
+            return
+        
+        logger.info(f"[AUTO-TRADE] Executing exit: {token_address[:8]}... reason: {reason}")
+        
+        # Sell tokens back to SOL
+        result = await self.jupiter.execute_swap(
+            keypair=keypair,
+            input_mint=token_address,
+            output_mint=WSOL_MINT,
+            amount_lamports=amount_tokens,
+            slippage_bps=MAX_SLIPPAGE_BPS
+        )
+        
+        # Calculate final P&L
+        exit_value_usd = 0
+        if result.success:
+            sol_price = await self.jupiter.get_token_price(WSOL_MINT) or 200
+            exit_sol = result.amount_tokens / LAMPORTS_PER_SOL if result.amount_tokens else 0
+            exit_value_usd = exit_sol * sol_price
+            final_pnl = exit_value_usd - entry_value_usd
+            pnl_pct = (final_pnl / entry_value_usd) * 100 if entry_value_usd else 0
+            
+            # Update P&L tracking
+            self.total_pnl_usd += final_pnl
+            self.total_trades += 1
+            if final_pnl >= 0:
+                self.winning_trades += 1
+            else:
+                self.losing_trades += 1
+            
+            # Update position for DB save
+            position["exit_value_usd"] = exit_value_usd
+            
+            # Save to database
+            await self._save_trade_to_db(position, "CLOSED", position.get("entry_signature"), result.signature, final_pnl)
+            
+            # Notify user with P&L report
+            pnl_emoji = "💰" if final_pnl >= 0 else "📉"
+            pnl_color = "+" if final_pnl >= 0 else ""
+            
+            if self.telegram_notify:
+                await self.telegram_notify(
+                    user_telegram_id,
+                    f"""{pnl_emoji} *POSITION CLOSED* {pnl_emoji}
+━━━━━━━━━━━━━━━━━━━━━
+
+*Reason:* {reason}
+*Entry Value:* ${entry_value_usd:.2f}
+*Exit Value:* ${exit_value_usd:.2f}
+*P&L:* {pnl_color}${final_pnl:.2f} ({pnl_color}{pnl_pct:.1f}%)
+
+*Signature:* `{result.signature[:20]}...`
+
+📊 *Session Stats:*
+Total Trades: {self.total_trades}
+Win Rate: {(self.winning_trades/self.total_trades*100) if self.total_trades else 0:.0f}%
+Total P&L: {'+' if self.total_pnl_usd >= 0 else ''}${self.total_pnl_usd:.2f}
+
+[View on Solscan](https://solscan.io/tx/{result.signature})"""
+                )
+            
+            logger.info(f"[AUTO-TRADE] ✅ Exit successful: {result.signature}, P&L: ${final_pnl:.2f}")
+        else:
+            # Exit failed - notify and try again?
+            await self._save_trade_to_db(position, "EXIT_FAILED", position.get("entry_signature"), None, pnl_usd)
+            
+            if self.telegram_notify:
+                await self.telegram_notify(
+                    user_telegram_id,
+                    f"⚠️ *EXIT FAILED*\n\nReason: {result.error}\nUnrealized P&L: ${pnl_usd:.2f}\n\n⚠️ Manual exit may be required!\nToken: `{token_address}`"
+                )
+            logger.error(f"[AUTO-TRADE] ❌ Exit failed: {result.error}")
+    
+    async def get_active_positions(self) -> List[Dict]:
+        """Get all active positions with current P&L"""
+        positions = []
+        for addr, pos in self.active_positions.items():
+            positions.append({
+                "token_address": addr,
+                "entry_time": pos["entry_time"].isoformat(),
+                "amount_sol": pos["amount_sol"],
+                "entry_value_usd": pos.get("entry_value_usd", 0),
+                "current_pnl_usd": pos.get("current_pnl_usd", 0),
+                "stop_loss_pct": pos.get("stop_loss_pct", self.default_stop_loss_pct),
+                "user_telegram_id": pos["user_telegram_id"]
+            })
+        return positions
+    
+    async def get_pnl_stats(self) -> Dict:
+        """Get overall P&L statistics"""
+        return {
+            "total_pnl_usd": self.total_pnl_usd,
+            "total_trades": self.total_trades,
+            "winning_trades": self.winning_trades,
+            "losing_trades": self.losing_trades,
+            "win_rate": (self.winning_trades / self.total_trades * 100) if self.total_trades else 0,
+            "active_positions": len(self.active_positions)
+        }
+    
+    async def set_stop_loss(self, token_address: str, stop_loss_pct: float) -> bool:
+        """Update stop-loss for an active position"""
+        if token_address in self.active_positions:
+            self.active_positions[token_address]["stop_loss_pct"] = stop_loss_pct
+            logger.info(f"Stop-loss updated for {token_address[:8]}... to {stop_loss_pct*100:.0f}%")
+            return True
+        return False
         
         # Step 7: Record trade and notify
         if result.success:
