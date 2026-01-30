@@ -738,15 +738,36 @@ class TrendingTokenScanner:
     async def get_trending_tokens(self) -> List[Dict]:
         """Get trending Solana tokens from DexScreener"""
         try:
+            # Use the token boosted endpoint for popular tokens
             response = await self.client.get(
-                "https://api.dexscreener.com/latest/dex/search",
-                params={"q": "solana"}
+                "https://api.dexscreener.com/token-boosts/top/v1"
             )
+            tokens = []
             if response.status_code == 200:
                 data = response.json()
-                pairs = data.get("pairs", [])[:20]
-                return [
-                    {
+                for item in data[:30]:
+                    if item.get("chainId") == "solana":
+                        tokens.append({
+                            "address": item.get("tokenAddress"),
+                            "symbol": item.get("description", "").split()[0] if item.get("description") else "UNKNOWN",
+                            "name": item.get("description", "Unknown"),
+                            "price_usd": 0,
+                            "liquidity_usd": 0,
+                            "volume_24h": 0,
+                            "price_change_24h": 0,
+                            "dex": "dexscreener",
+                            "url": item.get("url", "")
+                        })
+            
+            # Also fetch from pairs endpoint
+            response2 = await self.client.get(
+                "https://api.dexscreener.com/latest/dex/pairs/solana"
+            )
+            if response2.status_code == 200:
+                data2 = response2.json()
+                pairs = data2.get("pairs", [])[:20]
+                for p in pairs:
+                    tokens.append({
                         "address": p.get("baseToken", {}).get("address"),
                         "symbol": p.get("baseToken", {}).get("symbol"),
                         "name": p.get("baseToken", {}).get("name"),
@@ -755,11 +776,17 @@ class TrendingTokenScanner:
                         "volume_24h": float(p.get("volume", {}).get("h24", 0) or 0),
                         "price_change_24h": float(p.get("priceChange", {}).get("h24", 0) or 0),
                         "dex": p.get("dexId")
-                    }
-                    for p in pairs
-                    if p.get("chainId") == "solana"
-                ]
-            return []
+                    })
+            
+            # Remove duplicates and sort by volume
+            seen = set()
+            unique_tokens = []
+            for t in tokens:
+                if t["address"] and t["address"] not in seen:
+                    seen.add(t["address"])
+                    unique_tokens.append(t)
+            
+            return sorted(unique_tokens, key=lambda x: x.get("volume_24h", 0), reverse=True)[:20]
         except Exception as e:
             logger.error(f"Trending tokens error: {e}")
             return []
