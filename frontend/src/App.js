@@ -20,22 +20,15 @@ import {
   AlertTriangle,
   Target,
   Flame,
-  Eye
+  Eye,
+  Plus,
+  Trash2
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import "@/App.css";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
-
-// Whale wallets to display
-const WHALE_WALLETS = [
-  "74YhGgHA3x1jcL2TchwChDbRVVXvzSxNbYM6ytCukauM",
-  "2KUCqnm5c49wqG9cUyDiv9fVs12EMmNtBsrKpVZzLovd",
-  "EthJwgUrj8drTsUZxFt13uBpQeMv3E1ceDyGAseNaxeh",
-  "CkVqgWTBdZSbiaycU5K1M3JttKdAyjTwRbfZXoFugo65",
-  "7NTV2q79Ee4gqTH1KS52u14BA7GDvDUZmkzd7xE3Kxci"
-];
 
 // Payment addresses
 const PAYMENT_ADDRESSES = {
