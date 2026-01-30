@@ -1402,8 +1402,38 @@ async def get_trading_stats():
         "success_rate": (completed / total_trades * 100) if total_trades > 0 else 0,
         "whale_activities_today": whale_activities_today,
         "min_profit_target": MIN_PROFIT_USD,
+        "max_trade_time_seconds": MAX_TRADE_TIME_SECONDS,
+        "live_trading_enabled": LIVE_TRADING_ENABLED,
+        "auto_trade_enabled": AUTO_TRADE_ON_WHALE_SIGNAL,
+        "active_auto_traders": len(active_trading_users),
+        "tracked_whales": len(WHALE_WALLETS)
+    }
+
+@api_router.get("/system-status")
+async def get_system_status():
+    """Get overall system status"""
+    return {
+        "status": "online",
+        "live_trading_enabled": LIVE_TRADING_ENABLED,
+        "auto_trade_on_whale_signal": AUTO_TRADE_ON_WHALE_SIGNAL,
+        "helius_rpc_connected": helius_rpc is not None,
+        "jupiter_dex_ready": jupiter_dex is not None,
+        "whale_monitor_active": whale_monitor is not None,
+        "active_trading_users": len(active_trading_users),
+        "tracked_whale_wallets": len(WHALE_WALLETS),
+        "min_profit_target_usd": MIN_PROFIT_USD,
+        "max_trade_sol": MAX_TRADE_SOL,
         "max_trade_time_seconds": MAX_TRADE_TIME_SECONDS
     }
+
+@api_router.get("/wallet-balance/{address}")
+async def get_wallet_balance(address: str):
+    """Get wallet SOL balance via Helius"""
+    if not helius_rpc:
+        raise HTTPException(status_code=503, detail="Helius RPC not initialized")
+    
+    balance = await helius_rpc.get_balance(address)
+    return {"address": address, "balance_sol": balance}
 
 # Include router
 app.include_router(api_router)
