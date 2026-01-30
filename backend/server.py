@@ -469,9 +469,16 @@ Select payment option below:
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /help command"""
-    help_text = """
+    live_status = "🟢 LIVE" if LIVE_TRADING_ENABLED else "🔴 OFF"
+    auto_status = "🟢 ON" if AUTO_TRADE_ON_WHALE_SIGNAL else "🔴 OFF"
+    
+    help_text = f"""
 📖 *SOLANA SOLDIER COMMANDS* 📖
 ━━━━━━━━━━━━━━━━━━━━━
+
+*Trading Status:*
+Live Trading: {live_status}
+Auto-Trade on Whale: {auto_status}
 
 *User Commands:*
 /start - Start the bot
@@ -482,6 +489,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 /trending - See trending tokens
 /rugcheck \<token\> - Check token safety
 /trade \<token\> \<amount\> - Execute trade
+/autotrade \<amount\> - Enable auto-trading
+/stopautotrade - Disable auto-trading
 /positions - View active positions
 /pay - Buy daily access
 /help - Show this help
@@ -493,6 +502,134 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 *Support:* Contact @memecorpofficial
 """
     await update.message.reply_text(help_text, parse_mode='Markdown')
+
+async def autotrade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /autotrade command - enable auto trading on whale signals"""
+    telegram_id = update.effective_user.id
+    args = context.args
+    
+    # Default trade amount
+    trade_amount = 0.1
+    if args:
+        try:
+            trade_amount = float(args[0])
+        except ValueError:
+            await update.message.reply_text("Usage: /autotrade <amount_sol> (e.g., /autotrade 0.1)")
+            return
+    
+    # Check user credits
+    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    if not user or user.get('credits', 0) <= 0:
+        await update.message.reply_text("❌ You need credits to enable auto-trading. Use /pay to buy access.")
+        return
+    
+    # Get user's wallet
+    wallet = await db.wallets.find_one(
+        {"user_telegram_id": telegram_id, "is_active": True},
+        {"_id": 0}
+    )
+    if not wallet:
+        await update.message.reply_text("❌ No wallet found. Use /newwallet to create one.")
+        return
+    
+    # Check balance
+    if helius_rpc:
+        balance = await helius_rpc.get_balance(wallet['public_key'])
+        if balance < trade_amount + 0.01:
+            await update.message.reply_text(
+                f"❌ Insufficient balance for auto-trading.\nRequired: {trade_amount + 0.01:.4f} SOL\nAvailable: {balance:.4f} SOL\n\nFund your wallet:\n`{wallet['public_key']}`",
+                parse_mode='Markdown'
+            )
+            return
+    
+    # Recreate keypair
+    try:
+        private_key = wallet.get('private_key_encrypted')
+        keypair = Keypair.from_bytes(base58.b58decode(private_key))
+    except Exception as e:
+        await update.message.reply_text(f"❌ Error loading wallet: {str(e)[:50]}")
+        return
+    
+    # Register for auto-trading
+    active_trading_users[telegram_id] = {
+        'keypair': keypair,
+        'trade_amount': trade_amount,
+        'wallet_public_key': wallet['public_key'],
+        'enabled_at': datetime.now(timezone.utc).isoformat()
+    }
+    
+    await update.message.reply_text(
+        f"""
+🤖 *AUTO-TRADING ENABLED* 🤖
+━━━━━━━━━━━━━━━━━━━━━
+
+Your bot will now automatically trade when whales buy tokens!
+
+*Settings:*
+• Trade Amount: {trade_amount} SOL per signal
+• Wallet: `{wallet['public_key'][:16]}...`
+• Profit Target: ${MIN_PROFIT_USD}/trade
+• Max Trade Time: {MAX_TRADE_TIME_SECONDS}s
+
+⚠️ *IMPORTANT:*
+• Real SOL will be used for trades
+• Anti-rug protection is active
+• Use /stopautotrade to disable
+
+Good luck! 🚀
+""",
+        parse_mode='Markdown'
+    )
+    
+    logger.info(f"User {telegram_id} enabled auto-trading with {trade_amount} SOL")
+
+async def stopautotrade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /stopautotrade command - disable auto trading"""
+    telegram_id = update.effective_user.id
+    
+    if telegram_id in active_trading_users:
+        del active_trading_users[telegram_id]
+        await update.message.reply_text("✅ Auto-trading disabled. You will no longer receive automatic trades.")
+        logger.info(f"User {telegram_id} disabled auto-trading")
+    else:
+        await update.message.reply_text("ℹ️ Auto-trading was not enabled for your account.")
+
+async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /status command - show system status"""
+    telegram_id = update.effective_user.id
+    
+    # Check if user is admin
+    admin_username = update.effective_user.username
+    is_admin = f"@{admin_username}" == ADMIN_USERNAME
+    
+    user_auto_enabled = telegram_id in active_trading_users
+    user_trade_amount = active_trading_users.get(telegram_id, {}).get('trade_amount', 0)
+    
+    status_text = f"""
+📊 *SYSTEM STATUS* 📊
+━━━━━━━━━━━━━━━━━━━━━
+
+*Trading Engine:*
+• Live Trading: {'🟢 ENABLED' if LIVE_TRADING_ENABLED else '🔴 DISABLED'}
+• Auto-Trade on Whale: {'🟢 ON' if AUTO_TRADE_ON_WHALE_SIGNAL else '🔴 OFF'}
+• Helius RPC: {'🟢 Connected' if helius_rpc else '🔴 Not Connected'}
+• Jupiter DEX: {'🟢 Ready' if jupiter_dex else '🔴 Not Ready'}
+
+*Your Settings:*
+• Auto-Trading: {'🟢 ENABLED (' + str(user_trade_amount) + ' SOL)' if user_auto_enabled else '🔴 DISABLED'}
+
+*Active Users:* {len(active_trading_users)}
+*Tracked Whales:* {len(WHALE_WALLETS)}
+"""
+    
+    if is_admin:
+        status_text += f"""
+*Admin Info:*
+• Active Trading Users: {len(active_trading_users)}
+• Users: {[uid for uid in active_trading_users.keys()]}
+"""
+    
+    await update.message.reply_text(status_text, parse_mode='Markdown')
 
 async def trending_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /trending command - show trending tokens"""
