@@ -266,6 +266,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = user.id
     username = user.username or user.first_name
     
+    # Check if user is admin
+    user_is_admin = is_admin_user(username)
+    
     try:
         # Use telegram-specific db connection
         tg_db = get_telegram_db()
@@ -273,26 +276,55 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Check/create user in database
         existing_user = await tg_db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
         if not existing_user:
-            new_user = UserModel(telegram_id=telegram_id, username=username)
+            # New user - give admins unlimited credits
+            new_user = UserModel(
+                telegram_id=telegram_id, 
+                username=username,
+                is_admin=user_is_admin,
+                credits=999999 if user_is_admin else 0.0
+            )
             await tg_db.users.insert_one(new_user.model_dump())
+        else:
+            # Update existing user admin status if they became admin
+            if user_is_admin and not existing_user.get('is_admin'):
+                await tg_db.users.update_one(
+                    {"telegram_id": telegram_id},
+                    {"$set": {"is_admin": True, "credits": 999999}}
+                )
     except Exception as e:
         logger.error(f"DB error in start_command: {e}")
     
-    keyboard = [
-        [InlineKeyboardButton("💳 Create Wallet", callback_data="create_wallet"),
-         InlineKeyboardButton("💰 My Balance", callback_data="balance")],
-        [InlineKeyboardButton("🐋 Whale Watch", callback_data="whale_watch"),
-         InlineKeyboardButton("📊 My Trades", callback_data="my_trades")],
-        [InlineKeyboardButton("💵 Buy Access (£100/day)", callback_data="buy_access"),
-         InlineKeyboardButton("⚙️ Settings", callback_data="settings")],
-        [InlineKeyboardButton("📞 Support", callback_data="support")]
-    ]
+    # Different menu for admins
+    if user_is_admin:
+        keyboard = [
+            [InlineKeyboardButton("💳 Create Wallet", callback_data="create_wallet"),
+             InlineKeyboardButton("💰 My Balance", callback_data="balance")],
+            [InlineKeyboardButton("🐋 Whale Watch (Admin)", callback_data="whale_watch_admin"),
+             InlineKeyboardButton("📊 My Trades", callback_data="my_trades")],
+            [InlineKeyboardButton("➕ Add Wallet to Track", callback_data="add_wallet"),
+             InlineKeyboardButton("👥 Manage Users", callback_data="manage_users")],
+            [InlineKeyboardButton("⚙️ Settings", callback_data="settings"),
+             InlineKeyboardButton("📞 Support", callback_data="support")]
+        ]
+        admin_badge = "👑 *ADMIN MODE* 👑\n"
+    else:
+        keyboard = [
+            [InlineKeyboardButton("💳 Create Wallet", callback_data="create_wallet"),
+             InlineKeyboardButton("💰 My Balance", callback_data="balance")],
+            [InlineKeyboardButton("➕ Add Wallet to Track", callback_data="add_wallet"),
+             InlineKeyboardButton("📊 My Trades", callback_data="my_trades")],
+            [InlineKeyboardButton("💵 Buy Access (£100/day)", callback_data="buy_access"),
+             InlineKeyboardButton("⚙️ Settings", callback_data="settings")],
+            [InlineKeyboardButton("📞 Support", callback_data="support")]
+        ]
+        admin_badge = ""
+    
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     welcome_text = f"""
 🎖️ *SOLANA SOLDIER* 🎖️
 ━━━━━━━━━━━━━━━━━━━━━
-
+{admin_badge}
 Welcome, {username}! 
 
 I'm your automated Solana arbitrage trading bot.
@@ -302,12 +334,12 @@ I'm your automated Solana arbitrage trading bot.
 • ⚡ Execute trades in under 2 minutes
 • 💰 Target $2 profit per trade
 • 🛡️ Anti-rug protection built-in
-• 📊 100+ trades per day capability
+• ➕ Add your own wallets to track
 
 *Quick Start:*
 1. Create a wallet
-2. Buy daily access (£100)
-3. Start earning!
+2. {'Start trading! (Admin - Free Access)' if user_is_admin else 'Buy daily access (£100)'}
+3. Add wallets to track
 
 Select an option below:
 """
