@@ -500,15 +500,110 @@ async def setcredits_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.message.reply_text(f"❌ User @{target_username} not found.")
 
 async def whales_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle /whales command - show tracked whales"""
-    whale_text = "🐋 *TRACKED WHALE WALLETS* 🐋\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+    """Handle /whales command - show user's tracked wallets (preset wallets only for admin)"""
+    telegram_id = update.effective_user.id
+    username = update.effective_user.username
+    user_is_admin = is_admin_user(username)
     
-    for i, wallet in enumerate(WHALE_WALLETS[:5], 1):
-        whale_text += f"{i}. `{wallet[:8]}...{wallet[-8:]}`\n"
+    tg_db = get_telegram_db()
     
-    whale_text += f"\n...and {len(WHALE_WALLETS) - 5} more\n\n💡 These wallets are monitored 24/7 for trading opportunities."
+    # Get user's custom tracked wallets
+    user_wallets = await tg_db.user_tracked_wallets.find(
+        {"user_telegram_id": telegram_id, "is_active": True},
+        {"_id": 0}
+    ).to_list(50)
+    
+    whale_text = "🐋 *YOUR TRACKED WALLETS* 🐋\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+    
+    # Show user's custom wallets
+    if user_wallets:
+        whale_text += "*Your Wallets:*\n"
+        for i, w in enumerate(user_wallets, 1):
+            label = w.get('label', 'Unlabeled')
+            addr = w.get('wallet_address', '')
+            whale_text += f"{i}. `{addr[:8]}...{addr[-8:]}`\n   _{label}_\n"
+        whale_text += "\n"
+    else:
+        whale_text += "_No custom wallets added yet._\n\n"
+    
+    # Only show preset wallets to admins
+    if user_is_admin:
+        whale_text += f"*🔒 Preset Wallets (Admin Only):*\n"
+        for i, wallet in enumerate(WHALE_WALLETS[:5], 1):
+            whale_text += f"{i}. `{wallet[:8]}...{wallet[-8:]}`\n"
+        whale_text += f"\n...and {len(WHALE_WALLETS) - 5} more preset\n"
+    
+    whale_text += "\n💡 Use /addwallet to track a new wallet"
     
     await update.message.reply_text(whale_text, parse_mode='Markdown')
+
+async def addwallet_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /addwallet command - add a wallet to track"""
+    telegram_id = update.effective_user.id
+    args = context.args
+    
+    if not args:
+        await update.message.reply_text(
+            "Usage: /addwallet <wallet_address> [label]\n\nExample:\n`/addwallet 7NTV2q79Ee4gqTH1KS52u14BA7GDvDUZmkzd7xE3Kxci Whale1`",
+            parse_mode='Markdown'
+        )
+        return
+    
+    wallet_address = args[0]
+    label = " ".join(args[1:]) if len(args) > 1 else "Unlabeled"
+    
+    # Validate wallet address (basic check)
+    if len(wallet_address) < 32 or len(wallet_address) > 50:
+        await update.message.reply_text("❌ Invalid wallet address. Please enter a valid Solana address.")
+        return
+    
+    tg_db = get_telegram_db()
+    
+    # Check if already tracking
+    existing = await tg_db.user_tracked_wallets.find_one({
+        "user_telegram_id": telegram_id,
+        "wallet_address": wallet_address,
+        "is_active": True
+    })
+    
+    if existing:
+        await update.message.reply_text("❌ You're already tracking this wallet.")
+        return
+    
+    # Add wallet
+    tracked_wallet = UserTrackedWalletModel(
+        user_telegram_id=telegram_id,
+        wallet_address=wallet_address,
+        label=label
+    )
+    await tg_db.user_tracked_wallets.insert_one(tracked_wallet.model_dump())
+    
+    await update.message.reply_text(
+        f"✅ *Wallet Added!*\n\nAddress: `{wallet_address[:12]}...`\nLabel: {label}\n\nUse /whales to view your tracked wallets.",
+        parse_mode='Markdown'
+    )
+
+async def removewallet_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /removewallet command - remove a tracked wallet"""
+    telegram_id = update.effective_user.id
+    args = context.args
+    
+    if not args:
+        await update.message.reply_text("Usage: /removewallet <wallet_address>")
+        return
+    
+    wallet_address = args[0]
+    tg_db = get_telegram_db()
+    
+    result = await tg_db.user_tracked_wallets.update_one(
+        {"user_telegram_id": telegram_id, "wallet_address": wallet_address},
+        {"$set": {"is_active": False}}
+    )
+    
+    if result.modified_count > 0:
+        await update.message.reply_text(f"✅ Wallet `{wallet_address[:12]}...` removed from tracking.", parse_mode='Markdown')
+    else:
+        await update.message.reply_text("❌ Wallet not found in your tracked list.")
 
 async def pay_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /pay command - show payment options"""
