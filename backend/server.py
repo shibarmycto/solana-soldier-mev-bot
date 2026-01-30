@@ -153,6 +153,28 @@ class PaymentModel(BaseModel):
     status: str = "PENDING"
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
+class UserTrackedWalletModel(BaseModel):
+    """Wallets that users add to track"""
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_telegram_id: int
+    wallet_address: str
+    label: Optional[str] = None
+    is_active: bool = True
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+# Admin usernames who get free access
+ADMIN_USERNAMES = [
+    "memecorpofficial",
+    # Add more admin usernames here
+]
+
+def is_admin_user(username: str) -> bool:
+    """Check if user is an admin"""
+    if not username:
+        return False
+    return username.lower() in [a.lower() for a in ADMIN_USERNAMES]
+
 # API Response Models
 class StatsResponse(BaseModel):
     total_users: int
