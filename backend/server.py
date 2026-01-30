@@ -1300,14 +1300,87 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     
     elif data == "whale_watch":
-        whale_text = "🐋 *WHALE WATCH* 🐋\n\n"
-        for wallet in WHALE_WALLETS[:5]:
-            whale_text += f"• `{wallet[:12]}...`\n"
-        whale_text += f"\n+{len(WHALE_WALLETS)-5} more wallets tracked"
+        # For regular users - show their tracked wallets
+        tg_db = get_telegram_db()
+        user_wallets = await tg_db.user_tracked_wallets.find(
+            {"user_telegram_id": telegram_id, "is_active": True},
+            {"_id": 0}
+        ).to_list(10)
+        
+        whale_text = "🐋 *YOUR TRACKED WALLETS* 🐋\n\n"
+        if user_wallets:
+            for w in user_wallets:
+                label = w.get('label', 'Unlabeled')
+                addr = w.get('wallet_address', '')
+                whale_text += f"• `{addr[:12]}...` _{label}_\n"
+        else:
+            whale_text += "_No wallets tracked yet._\n"
+        
+        whale_text += "\n💡 Use /addwallet to track a wallet"
         
         keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="back_main")]]
         await query.edit_message_text(
             whale_text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='Markdown'
+        )
+    
+    elif data == "whale_watch_admin":
+        # Admin view - show preset wallets
+        whale_text = "🐋 *ADMIN - PRESET WHALE WALLETS* 🐋\n\n"
+        for i, wallet in enumerate(WHALE_WALLETS, 1):
+            whale_text += f"{i}. `{wallet[:8]}...{wallet[-8:]}`\n"
+        
+        whale_text += f"\n*Total:* {len(WHALE_WALLETS)} wallets monitored 24/7"
+        
+        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="back_main")]]
+        await query.edit_message_text(
+            whale_text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='Markdown'
+        )
+    
+    elif data == "add_wallet":
+        await query.edit_message_text(
+            """
+➕ *ADD WALLET TO TRACK* ➕
+
+To add a wallet, use the command:
+`/addwallet <address> [label]`
+
+*Example:*
+`/addwallet 7NTV2q79Ee4gqTH1KS52u14BA7GDvDUZmkzd7xE3Kxci MyWhale`
+
+Use /whales to view your tracked wallets.
+Use /removewallet <address> to remove.
+""",
+            parse_mode='Markdown'
+        )
+    
+    elif data == "manage_users":
+        # Admin only
+        username = query.from_user.username
+        if not is_admin_user(username):
+            await query.edit_message_text("❌ Admin access required.")
+            return
+        
+        tg_db = get_telegram_db()
+        users = await tg_db.users.find({}, {"_id": 0}).to_list(20)
+        
+        text = "👥 *USER MANAGEMENT* 👥\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+        text += f"*Total Users:* {len(users)}\n\n"
+        
+        for u in users[:10]:
+            is_admin = u.get('is_admin', False)
+            credits = u.get('credits', 0)
+            badge = "👑" if is_admin else "👤"
+            text += f"{badge} @{u.get('username', 'unknown')} - {credits:.0f} credits\n"
+        
+        text += "\n*Commands:*\n/setcredits @user amount"
+        
+        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="back_main")]]
+        await query.edit_message_text(
+            text,
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode='Markdown'
         )
