@@ -274,9 +274,11 @@ class SolanaSoldierAPITester:
         self.test_trades_endpoint()
         self.test_payments_endpoint()
         
-        # Additional endpoints
+        # Phase 2 endpoints
         self.test_whale_activities_endpoint()
         self.test_trending_tokens_endpoint()
+        self.test_trading_stats_endpoint()
+        self.test_rugcheck_endpoint()
         
         # Print summary
         print("=" * 60)
