@@ -16,7 +16,11 @@ import {
   Clock,
   DollarSign,
   BarChart3,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle,
+  Target,
+  Flame,
+  Eye
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import "@/App.css";
