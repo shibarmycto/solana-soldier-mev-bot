@@ -259,6 +259,75 @@ class SolanaSoldierAPITester:
                 self.log_test("Rugcheck Validation", False, 
                             f"Missing fields: {missing_fields}")
 
+    def test_system_status_endpoint(self):
+        """Test /api/system-status endpoint - Phase 3 feature"""
+        success, data = self.test_api_endpoint("/system-status", 
+                                             test_name="System Status Endpoint")
+        if success and data:
+            # Check required Phase 3 fields
+            required_fields = ['live_trading_enabled', 'auto_trade_on_whale_signal', 
+                             'helius_rpc_connected', 'whale_monitor_active']
+            missing_fields = [field for field in required_fields if field not in data]
+            
+            if not missing_fields:
+                live_trading = data.get('live_trading_enabled')
+                auto_trade = data.get('auto_trade_on_whale_signal')
+                helius_connected = data.get('helius_rpc_connected')
+                whale_monitor = data.get('whale_monitor_active')
+                
+                # Verify Phase 3 requirements
+                if live_trading and auto_trade and helius_connected and whale_monitor:
+                    self.log_test("System Status Phase 3 Validation", True, 
+                                f"Live Trading: {live_trading}, Auto-Trade: {auto_trade}, Helius: {helius_connected}, Whale Monitor: {whale_monitor}")
+                else:
+                    self.log_test("System Status Phase 3 Validation", False, 
+                                f"Phase 3 requirements not met - Live Trading: {live_trading}, Auto-Trade: {auto_trade}, Helius: {helius_connected}, Whale Monitor: {whale_monitor}")
+            else:
+                self.log_test("System Status Validation", False, 
+                            f"Missing fields: {missing_fields}")
+
+    def test_wallet_balance_endpoint(self):
+        """Test /api/wallet-balance/{address} endpoint - Phase 3 Helius integration"""
+        # Test with a known Solana address (WSOL mint)
+        test_address = "So11111111111111111111111111111111111111112"
+        success, data = self.test_api_endpoint(f"/wallet-balance/{test_address}", 
+                                             test_name="Wallet Balance Endpoint")
+        if success and data:
+            required_fields = ['address', 'balance_sol']
+            missing_fields = [field for field in required_fields if field not in data]
+            
+            if not missing_fields:
+                address = data.get('address')
+                balance = data.get('balance_sol')
+                if address == test_address and isinstance(balance, (int, float)):
+                    self.log_test("Wallet Balance Validation", True, 
+                                f"Address: {address[:8]}..., Balance: {balance} SOL")
+                else:
+                    self.log_test("Wallet Balance Validation", False, 
+                                f"Invalid response - Address: {address}, Balance: {balance}")
+            else:
+                self.log_test("Wallet Balance Validation", False, 
+                            f"Missing fields: {missing_fields}")
+
+    def test_trading_stats_phase3(self):
+        """Test /api/trading-stats endpoint for Phase 3 fields"""
+        success, data = self.test_api_endpoint("/trading-stats", 
+                                             test_name="Trading Stats Phase 3 Check")
+        if success and data:
+            # Check for Phase 3 specific fields
+            phase3_fields = ['live_trading_enabled', 'auto_trade_enabled']
+            found_fields = [field for field in phase3_fields if field in data]
+            
+            if len(found_fields) == len(phase3_fields):
+                live_enabled = data.get('live_trading_enabled')
+                auto_enabled = data.get('auto_trade_enabled')
+                self.log_test("Trading Stats Phase 3 Fields", True, 
+                            f"Live Trading: {live_enabled}, Auto Trade: {auto_enabled}")
+            else:
+                missing = [field for field in phase3_fields if field not in data]
+                self.log_test("Trading Stats Phase 3 Fields", False, 
+                            f"Missing Phase 3 fields: {missing}")
+
     def run_all_tests(self):
         """Run all backend API tests"""
         print("🚀 Starting Solana Soldier Backend API Tests")
