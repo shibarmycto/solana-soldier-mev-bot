@@ -210,9 +210,54 @@ class SolanaSoldierAPITester:
         """Test /api/trending-tokens endpoint"""
         success, data = self.test_api_endpoint("/trending-tokens", 
                                              test_name="Trending Tokens Endpoint")
-        # This endpoint might return different structures, so just check if it responds
-        if success:
-            self.log_test("Trending Tokens Response", True, "Endpoint responded successfully")
+        if success and data:
+            if isinstance(data, dict) and 'tokens' in data:
+                tokens = data['tokens']
+                if isinstance(tokens, list):
+                    self.log_test("Trending Tokens Validation", True, 
+                                f"Found {len(tokens)} trending tokens")
+                else:
+                    self.log_test("Trending Tokens Validation", False, 
+                                "Tokens field is not a list")
+            else:
+                self.log_test("Trending Tokens Validation", False, 
+                            "Response missing 'tokens' field")
+
+    def test_trading_stats_endpoint(self):
+        """Test /api/trading-stats endpoint"""
+        success, data = self.test_api_endpoint("/trading-stats", 
+                                             test_name="Trading Stats Endpoint")
+        if success and data:
+            required_fields = ['min_profit_target', 'max_trade_time_seconds', 
+                             'total_trades', 'success_rate']
+            missing_fields = [field for field in required_fields if field not in data]
+            
+            if not missing_fields:
+                self.log_test("Trading Stats Validation", True, 
+                            f"All required fields present. Profit target: ${data.get('min_profit_target')}, Max time: {data.get('max_trade_time_seconds')}s")
+            else:
+                self.log_test("Trading Stats Validation", False, 
+                            f"Missing fields: {missing_fields}")
+
+    def test_rugcheck_endpoint(self):
+        """Test /api/rugcheck/{token} endpoint"""
+        # Test with WSOL address
+        test_token = "So11111111111111111111111111111111111111112"
+        success, data = self.test_api_endpoint(f"/rugcheck/{test_token}", 
+                                             method="POST",
+                                             test_name="Rugcheck Endpoint")
+        if success and data:
+            required_fields = ['token_address', 'is_safe', 'risk_score', 'warnings']
+            missing_fields = [field for field in required_fields if field not in data]
+            
+            if not missing_fields:
+                safety_status = "SAFE" if data.get('is_safe') else "RISKY"
+                risk_score = data.get('risk_score', 0) * 100
+                self.log_test("Rugcheck Validation", True, 
+                            f"Token check complete. Status: {safety_status}, Risk: {risk_score:.0f}%")
+            else:
+                self.log_test("Rugcheck Validation", False, 
+                            f"Missing fields: {missing_fields}")
 
     def run_all_tests(self):
         """Run all backend API tests"""
