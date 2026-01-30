@@ -73,6 +73,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Initialize trading components (will be set in startup)
+jupiter_dex: Optional[JupiterDEX] = None
+rug_detector: Optional[RugDetector] = None
+whale_monitor: Optional[WhaleMonitor] = None
+auto_trader: Optional[AutoTrader] = None
+trending_scanner: Optional[TrendingTokenScanner] = None
+whale_monitor_task: Optional[asyncio.Task] = None
+
 # Pydantic Models
 class UserModel(BaseModel):
     model_config = ConfigDict(extra="ignore")
