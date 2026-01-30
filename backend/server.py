@@ -617,36 +617,80 @@ async def trade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
                 return
         
-        # Create trade signal
-        signal = TradeSignal(
-            token_address=token_address,
-            token_symbol="TOKEN",
-            action="BUY",
-            reason="Manual trade",
-            confidence=0.8,
-            risk_score=rug_result.risk_score if rug_result else 0
-        )
-        
-        # Execute via Jupiter (simulated for safety)
-        trade_record = TradeModel(
-            user_telegram_id=telegram_id,
-            wallet_public_key=wallet['public_key'],
-            token_address=token_address,
-            trade_type="BUY",
-            amount_sol=amount_sol,
-            status="SIMULATED"  # Change to PENDING for real trades
-        )
-        await db.trades.insert_one(trade_record.model_dump())
-        
-        # Deduct credits
-        await db.users.update_one(
-            {"telegram_id": telegram_id},
-            {"$inc": {"credits": -1}}
-        )
-        
-        await update.message.reply_text(
-            f"""
-✅ *TRADE QUEUED* ✅
+        # Check if live trading is enabled
+        if LIVE_TRADING_ENABLED and jupiter_dex and helius_rpc:
+            # Get user's private key from wallet
+            private_key = wallet.get('private_key_encrypted')
+            if not private_key:
+                await update.message.reply_text("❌ Wallet private key not found. Create a new wallet.")
+                return
+            
+            # Recreate keypair
+            keypair = Keypair.from_bytes(base58.b58decode(private_key))
+            
+            # Check balance via Helius
+            balance = await helius_rpc.get_balance(wallet['public_key'])
+            if balance < amount_sol + 0.01:  # Need extra for gas
+                await update.message.reply_text(
+                    f"❌ Insufficient balance.\nRequired: {amount_sol + 0.01:.4f} SOL\nAvailable: {balance:.4f} SOL\n\nFund your wallet: `{wallet['public_key']}`",
+                    parse_mode='Markdown'
+                )
+                return
+            
+            # Execute LIVE trade
+            await update.message.reply_text("🚀 *Executing LIVE trade...*", parse_mode='Markdown')
+            
+            amount_lamports = int(amount_sol * LAMPORTS_PER_SOL)
+            result = await jupiter_dex.execute_swap(
+                keypair=keypair,
+                input_mint=WSOL_MINT,
+                output_mint=token_address,
+                amount_lamports=amount_lamports
+            )
+            
+            if result.success:
+                # Record successful trade
+                trade_record = TradeModel(
+                    user_telegram_id=telegram_id,
+                    wallet_public_key=wallet['public_key'],
+                    token_address=token_address,
+                    trade_type="BUY",
+                    amount_sol=amount_sol,
+                    status="COMPLETED"
+                )
+                await db.trades.insert_one(trade_record.model_dump())
+                
+                await update.message.reply_text(
+                    f"""
+✅ *LIVE TRADE EXECUTED* ✅
+━━━━━━━━━━━━━━━━━━━━━
+
+*Signature:* `{result.signature[:20]}...`
+*Token:* `{token_address[:16]}...`
+*Amount:* {amount_sol} SOL
+*Status:* COMPLETED
+
+[View on Solscan](https://solscan.io/tx/{result.signature})
+""",
+                    parse_mode='Markdown'
+                )
+            else:
+                await update.message.reply_text(f"❌ Trade failed: {result.error}")
+        else:
+            # Simulated trade (live trading disabled)
+            trade_record = TradeModel(
+                user_telegram_id=telegram_id,
+                wallet_public_key=wallet['public_key'],
+                token_address=token_address,
+                trade_type="BUY",
+                amount_sol=amount_sol,
+                status="SIMULATED"
+            )
+            await db.trades.insert_one(trade_record.model_dump())
+            
+            await update.message.reply_text(
+                f"""
+✅ *TRADE SIMULATED* ✅
 ━━━━━━━━━━━━━━━━━━━━━
 
 *Trade ID:* `{trade_record.id[:8]}...`
@@ -654,10 +698,16 @@ async def trade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 *Amount:* {amount_sol} SOL
 *Status:* SIMULATED
 
-⚠️ Real trading requires wallet funding.
-Use /positions to view active trades.
+⚠️ Live trading: {'ENABLED' if LIVE_TRADING_ENABLED else 'DISABLED'}
+Fund wallet to enable live trades.
 """,
-            parse_mode='Markdown'
+                parse_mode='Markdown'
+            )
+        
+        # Deduct credits
+        await db.users.update_one(
+            {"telegram_id": telegram_id},
+            {"$inc": {"credits": -1}}
         )
         
     except Exception as e:
