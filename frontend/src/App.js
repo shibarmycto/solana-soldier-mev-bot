@@ -145,7 +145,7 @@ const LandingPage = () => {
           <motion.a
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            href="https://t.me/SolanaSoldierBot"
+            href="https://t.me/Cfsolanasoldier_bot"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary px-6 py-3 rounded-sm flex items-center gap-2"
@@ -173,7 +173,7 @@ const LandingPage = () => {
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
               <a
-                href="https://t.me/SolanaSoldierBot"
+                href="https://t.me/Cfsolanasoldier_bot"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary px-8 py-4 rounded-sm flex items-center gap-2 text-lg"
@@ -289,7 +289,7 @@ const LandingPage = () => {
           
           <div className="mt-8">
             <a
-              href="https://t.me/SolanaSoldierBot"
+              href="https://t.me/Cfsolanasoldier_bot"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary px-8 py-4 rounded-sm inline-flex items-center gap-2"
