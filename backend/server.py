@@ -1059,15 +1059,17 @@ async def whale_activity_callback(activity: Dict):
         for telegram_id, user_data in active_trading_users.items():
             try:
                 keypair = user_data.get('keypair')
-                trade_amount = user_data.get('trade_amount', 0.1)
+                trade_amount = user_data.get('trade_amount', MIN_TRADE_SOL)
+                stop_loss_pct = user_data.get('stop_loss_pct', DEFAULT_STOP_LOSS_PCT)
                 
                 if keypair and auto_trader:
-                    # Execute auto trade
+                    # Execute auto trade with stop-loss
                     result = await auto_trader.process_whale_signal(
                         activity=activity,
                         user_keypair=keypair,
                         user_telegram_id=telegram_id,
-                        trade_amount_sol=trade_amount
+                        trade_amount_sol=trade_amount,
+                        stop_loss_pct=stop_loss_pct
                     )
                     
                     if result and result.success:
