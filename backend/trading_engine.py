@@ -20,6 +20,12 @@ from solders.pubkey import Pubkey
 from solders.transaction import VersionedTransaction
 from solders.signature import Signature
 import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +52,7 @@ MIN_LIQUIDITY_USD = 10000
 GAS_RESERVE_SOL = 0.01  # Reserve for gas fees
 MAX_TRADE_SOL = 0.5  # Maximum SOL per trade for safety
 
-# Live trading flags
+# Live trading flags - read after dotenv loads
 LIVE_TRADING_ENABLED = os.environ.get('LIVE_TRADING_ENABLED', 'false').lower() == 'true'
 AUTO_TRADE_ON_WHALE_SIGNAL = os.environ.get('AUTO_TRADE_ON_WHALE_SIGNAL', 'false').lower() == 'true'
 
