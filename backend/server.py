@@ -1611,6 +1611,9 @@ def run_telegram_bot():
         telegram_app.add_handler(CommandHandler("positions", positions_command))
         telegram_app.add_handler(CommandHandler("autotrade", autotrade_command))
         telegram_app.add_handler(CommandHandler("stopautotrade", stopautotrade_command))
+        telegram_app.add_handler(CommandHandler("stoploss", stoploss_command))
+        telegram_app.add_handler(CommandHandler("pnl", pnl_command))
+        telegram_app.add_handler(CommandHandler("trades", trades_command))
         telegram_app.add_handler(CommandHandler("status", status_command))
         telegram_app.add_handler(CallbackQueryHandler(button_callback))
         
