@@ -328,6 +328,69 @@ class SolanaSoldierAPITester:
                 self.log_test("Trading Stats Phase 3 Fields", False, 
                             f"Missing Phase 3 fields: {missing}")
 
+    def test_pnl_stats_endpoint(self):
+        """Test /api/pnl-stats endpoint - Phase 4 feature"""
+        success, data = self.test_api_endpoint("/pnl-stats", 
+                                             test_name="P&L Stats Endpoint")
+        if success and data:
+            # Check required P&L fields
+            required_fields = ['total_pnl_usd', 'total_trades', 'winning_trades', 
+                             'losing_trades', 'win_rate', 'active_positions']
+            missing_fields = [field for field in required_fields if field not in data]
+            
+            if not missing_fields:
+                total_pnl = data.get('total_pnl_usd', 0)
+                total_trades = data.get('total_trades', 0)
+                win_rate = data.get('win_rate', 0)
+                active_positions = data.get('active_positions', 0)
+                
+                self.log_test("P&L Stats Validation", True, 
+                            f"Total P&L: ${total_pnl}, Trades: {total_trades}, Win Rate: {win_rate:.1f}%, Active: {active_positions}")
+            else:
+                self.log_test("P&L Stats Validation", False, 
+                            f"Missing fields: {missing_fields}")
+
+    def test_system_status_phase4(self):
+        """Test /api/system-status endpoint for Phase 4 settings"""
+        success, data = self.test_api_endpoint("/system-status", 
+                                             test_name="System Status Phase 4 Check")
+        if success and data:
+            # Check Phase 4 specific settings
+            min_trade_sol = data.get('min_trade_sol')
+            max_trade_sol = data.get('max_trade_sol')
+            
+            # Verify 0.02 SOL minimum trade requirement
+            if min_trade_sol == 0.02:
+                self.log_test("Phase 4 Min Trade Validation", True, 
+                            f"Min trade correctly set to {min_trade_sol} SOL")
+            else:
+                self.log_test("Phase 4 Min Trade Validation", False, 
+                            f"Expected min trade 0.02 SOL, got {min_trade_sol}")
+            
+            # Check other Phase 4 settings
+            if max_trade_sol and isinstance(max_trade_sol, (int, float)):
+                self.log_test("Phase 4 Max Trade Validation", True, 
+                            f"Max trade set to {max_trade_sol} SOL")
+            else:
+                self.log_test("Phase 4 Max Trade Validation", False, 
+                            f"Invalid max trade value: {max_trade_sol}")
+
+    def test_trading_stats_phase4(self):
+        """Test /api/trading-stats endpoint includes Phase 4 fields"""
+        success, data = self.test_api_endpoint("/trading-stats", 
+                                             test_name="Trading Stats Phase 4 Check")
+        if success and data:
+            # Verify live_trading_enabled and auto_trade_enabled are present and True
+            live_trading = data.get('live_trading_enabled')
+            auto_trade = data.get('auto_trade_enabled')
+            
+            if live_trading is True and auto_trade is True:
+                self.log_test("Phase 4 Trading Flags Validation", True, 
+                            f"Live Trading: {live_trading}, Auto Trade: {auto_trade}")
+            else:
+                self.log_test("Phase 4 Trading Flags Validation", False, 
+                            f"Expected both flags to be True - Live Trading: {live_trading}, Auto Trade: {auto_trade}")
+
     def run_all_tests(self):
         """Run all backend API tests"""
         print("🚀 Starting Solana Soldier Backend API Tests")
