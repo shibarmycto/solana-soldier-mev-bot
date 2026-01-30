@@ -1087,8 +1087,100 @@ async def admin_set_credits(request: SetCreditsRequest):
 @api_router.get("/trending-tokens")
 async def get_trending_tokens_endpoint():
     """Get trending Solana tokens"""
-    tokens = await get_trending_tokens()
-    return tokens
+    if trending_scanner:
+        tokens = await trending_scanner.get_trending_tokens()
+        return {"tokens": tokens}
+    return {"tokens": []}
+
+@api_router.get("/new-pairs")
+async def get_new_pairs_endpoint():
+    """Get newly created Solana pairs"""
+    if trending_scanner:
+        pairs = await trending_scanner.get_new_pairs()
+        return {"pairs": pairs}
+    return {"pairs": []}
+
+@api_router.post("/rugcheck/{token_address}")
+async def rugcheck_endpoint(token_address: str):
+    """Check if a token is safe to trade"""
+    if not rug_detector:
+        raise HTTPException(status_code=503, detail="Rug detector not initialized")
+    
+    result = await rug_detector.check_token(token_address)
+    return {
+        "token_address": token_address,
+        "is_safe": result.is_safe,
+        "risk_score": result.risk_score,
+        "warnings": result.warnings,
+        "details": result.details
+    }
+
+@api_router.get("/active-positions")
+async def get_active_positions():
+    """Get all active trading positions"""
+    if auto_trader:
+        positions = await auto_trader.get_active_positions()
+        return {"positions": positions}
+    return {"positions": []}
+
+class ExecuteTradeRequest(BaseModel):
+    user_telegram_id: int
+    token_address: str
+    amount_sol: float
+    trade_type: str = "BUY"
+
+@api_router.post("/execute-trade")
+async def execute_trade_endpoint(request: ExecuteTradeRequest):
+    """Execute a trade (admin/API use)"""
+    # Get user's wallet
+    wallet = await db.wallets.find_one(
+        {"user_telegram_id": request.user_telegram_id, "is_active": True},
+        {"_id": 0}
+    )
+    if not wallet:
+        raise HTTPException(status_code=404, detail="No wallet found for user")
+    
+    # Create trade record
+    trade = TradeModel(
+        user_telegram_id=request.user_telegram_id,
+        wallet_public_key=wallet['public_key'],
+        token_address=request.token_address,
+        trade_type=request.trade_type,
+        amount_sol=request.amount_sol,
+        status="QUEUED"
+    )
+    await db.trades.insert_one(trade.model_dump())
+    
+    return {"status": "queued", "trade_id": trade.id}
+
+@api_router.get("/trading-stats")
+async def get_trading_stats():
+    """Get trading statistics"""
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    total_trades = await db.trades.count_documents({})
+    trades_today = await db.trades.count_documents({"created_at": {"$gte": today.isoformat()}})
+    
+    all_trades = await db.trades.find({}, {"_id": 0, "profit_usd": 1, "status": 1}).to_list(10000)
+    total_profit = sum(t.get('profit_usd', 0) for t in all_trades)
+    completed = sum(1 for t in all_trades if t.get('status') == 'COMPLETED')
+    failed = sum(1 for t in all_trades if t.get('status') == 'FAILED')
+    
+    whale_activities_today = await db.whale_activities.count_documents({
+        "detected_at": {"$gte": today.isoformat()}
+    })
+    
+    return {
+        "total_trades": total_trades,
+        "trades_today": trades_today,
+        "total_profit_usd": total_profit,
+        "completed_trades": completed,
+        "failed_trades": failed,
+        "success_rate": (completed / total_trades * 100) if total_trades > 0 else 0,
+        "whale_activities_today": whale_activities_today,
+        "min_profit_target": MIN_PROFIT_USD,
+        "max_trade_time_seconds": MAX_TRADE_TIME_SECONDS
+    }
 
 # Include router
 app.include_router(api_router)
