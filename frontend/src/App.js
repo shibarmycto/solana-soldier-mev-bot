@@ -232,24 +232,6 @@ const LandingPage = () => {
           ))}
         </div>
         
-        {/* Whale Wallets */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mb-16"
-        >
-          <h2 className="font-unbounded font-bold text-2xl text-white mb-6 flex items-center gap-3">
-            <Activity className="w-6 h-6 text-[#14F195]" />
-            Tracked Whale Wallets
-          </h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            {WHALE_WALLETS.map((wallet, index) => (
-              <WhaleCard key={wallet} address={wallet} index={index} />
-            ))}
-          </div>
-        </motion.div>
-        
         {/* Pricing */}
         <motion.div
           initial={{ opacity: 0 }}
