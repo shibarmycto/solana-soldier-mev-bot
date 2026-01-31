@@ -1,0 +1,6 @@
+{
+  "bot_token": "8223733917:AAFabLukypvSim_T9zIMmu6Zvi0XfOoRNc4",
+  "target_group_id": -4993252670,
+  "trigger_phrase": "USER MESSAGE",
+  "response_message": "Hello! I'm the AI assistant responding to your message. How can I help you today?"
+}

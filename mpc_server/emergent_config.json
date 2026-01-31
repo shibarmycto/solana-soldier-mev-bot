@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "mev-bot-mpc": {
+      "command": "npx",
+      "args": ["-y", "@clawd/mpc-server"],
+      "env": {
+        "API_KEY": "sk-mpc-server-key-1234567890abcdef",
+        "PORT": "3000",
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}

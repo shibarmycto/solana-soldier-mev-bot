@@ -1,0 +1,46 @@
+name = "matrix-ai-agent"
+compatibility_date = "2023-12-01"
+main = "src/index.js"
+
+# Bind the D1 database
+[[d1_databases]]
+binding = "DB"
+database_name = "matrix_ai_db"
+database_id = ""
+migrations_dir = "migrations"
+
+# Bind the KV namespace
+[[kv_namespaces]]
+binding = "KV"
+id = ""
+preview_id = ""
+
+# Bind R2 bucket for file storage
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "matrix-ai-storage"
+
+# Environment variables
+[vars]
+ENVIRONMENT = "production"
+DEBUG = "false"
+
+# Enable all available compatibility flags
+compatibility_flags = ["nodejs_compat"]
+
+# Define routes for the worker
+routes = [
+    "https://matrix-ai-agent.your-subdomain.workers.dev/*",
+    "https://ai.meme-corp.net/*"
+]
+
+# Define triggers for scheduled events
+[triggers]
+crons = ["*/30 * * * *"]  # Every 30 minutes
+
+# Define usage model (bundled by default)
+usage_model = "bundled"
+
+# Define the placement for the worker
+[placement]
+mode = "smart"

@@ -1,8 +1,12 @@
-# Solana Soldier MEV Bot
+# Multi-Purpose Bot Collection
+
+This repository contains multiple bots including the Solana Soldier MEV Bot and the Claude Remote Assistant Bot.
+
+## Solana Soldier MEV Bot
 
 A sophisticated MEV (Maximal Extractable Value) bot for the Solana blockchain that identifies and executes profitable trading opportunities such as arbitrage, JIT ladder protection, and front-running.
 
-## Features
+### Solana Bot Features
 
 - **Real-time Mempool Monitoring**: Monitors Solana mempool for profitable opportunities
 - **Multiple MEV Strategies**: 
@@ -13,13 +17,13 @@ A sophisticated MEV (Maximal Extractable Value) bot for the Solana blockchain th
 - **Priority Fee Management**: Uses dynamic fee calculation for transaction inclusion
 - **Risk Management**: Built-in safeguards to minimize losses
 
-## Prerequisites
+### Solana Bot Prerequisites
 
 - Python 3.8+
 - Solana account with sufficient SOL for transaction fees
 - Access to a Solana RPC endpoint (recommended: QuickNode, Alchemy, or own node)
 
-## Installation
+### Solana Bot Installation
 
 1. Clone the repository:
 ```bash
@@ -32,7 +36,7 @@ cd solana-soldier-mev-bot
 pip install -r requirements.txt
 ```
 
-## Configuration
+### Solana Bot Configuration
 
 1. Set up your environment variables:
 ```bash
@@ -47,7 +51,7 @@ PRIORITY_FEE_CAP=0.01  # Max priority fee in SOL
 MIN_PROFIT_THRESHOLD=0.001  # Minimum profit threshold (0.1%)
 ```
 
-## Usage
+### Solana Bot Usage
 
 To run the bot:
 
@@ -55,22 +59,45 @@ To run the bot:
 python solana_soldier_mev_bot.py
 ```
 
-## Railway Deployment
+## Claude Remote Assistant Bot
 
-This bot is configured for easy deployment on Railway:
+An advanced Telegram bot that integrates with Anthropic's Claude AI to provide remote device control and automation capabilities.
 
-1. Create a new Railway project
-2. Connect to this GitHub repository
-3. Add the required environment variables in the Variables section
-4. Deploy!
+### Claude Bot Features
+- AI-powered conversations using Anthropic Claude
+- Remote device control (Android, iOS, PC)
+- Job application automation
+- Form filling assistance
+- Multi-platform messaging integration
+- Secure session management
 
-The `Procfile` is already configured to run the bot as a web service.
+### Railway Deployment
+
+Both bots are configured for easy deployment on Railway.app:
+
+1. **Prerequisites**:
+   - For Claude Bot: Telegram Bot Token (from @BotFather) and Anthropic Claude API Key
+   - For Solana Bot: Solana account with SOL for transaction fees
+
+2. **Quick Deploy**:
+   - The project includes `railway.json` for automatic configuration (in claude-remote-assistant/)
+   - Required environment variables are pre-defined
+   - Dockerfile included for containerized deployment
+
+3. **To Deploy Claude Bot**:
+   - Fork this repository
+   - Connect to Railway.app
+   - Set required environment variables
+   - Deploy with one click
+
+See `claude-remote-assistant/RUNNING_ON_RAILWAY.md` for detailed deployment instructions.
 
 ## Architecture
 
-- `solana_soldier_mev_bot.py`: Main bot implementation
+- `solana_soldier_mev_bot.py`: Main Solana bot implementation
+- `claude-remote-assistant/`: Claude Remote Assistant Bot directory
 - `requirements.txt`: Python dependencies
-- `Procfile`: Railway deployment configuration
+- `Procfile`: Railway deployment configuration (now points to Claude bot)
 - `.env.example`: Environment variable template
 
 ## Risk Disclaimer

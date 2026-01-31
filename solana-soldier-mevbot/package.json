@@ -1,0 +1,36 @@
+{
+  "name": "solana-soldier-mevbot",
+  "version": "1.0.0",
+  "description": "Solana Soldier MEV Bot Landing Page",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve -l 3000 .",
+    "deploy": "npx wrangler pages deploy .",
+    "cf-deploy": "npx wrangler deploy"
+  },
+  "keywords": [
+    "solana",
+    "mev",
+    "bot",
+    "arbitrage",
+    "trading",
+    "cryptocurrency",
+    "web3"
+  ],
+  "author": "Solana Soldier",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "railway": {
+    "build": "echo 'Static site - no build required'",
+    "deploy": "echo 'Deploying static site'"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

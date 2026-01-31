@@ -1,0 +1,1502 @@
+2026-01-30 19:30:04 - Starting bot monitoring check
+2026-01-30 19:30:04 - Gateway service is RUNNING
+2026-01-30 19:30:14 - Gateway status: (node:87183) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 87189, state active)
+Warm-up: launch agents can take a few seconds. Try again shortly.
+RPC probe: failed
+RPC target: ws://127.0.0.1:18789
+  gateway closed (1006 abnormal closure (no close frame)): no close reason
+  Gateway target: ws://127.0.0.1:18789
+  Source: cli --url
+  Config: /Users/anthonypium/.clawdbot/clawdbot.json
+
+Gateway port 18789 is not listening (service appears running).
+Last gateway error: at processTicksAndRejections (node:internal/process/task_queues:104:5)
+Logs: ~/.clawdbot/logs/gateway.log
+Errors: ~/.clawdbot/logs/gateway.err.log
+
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 19:30:14 - Bot monitoring check completed
+---
+2026-01-30 19:35:14 - Starting bot monitoring check
+2026-01-30 19:35:14 - Gateway service is RUNNING
+2026-01-30 19:35:20 - Gateway status: (node:87332) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 87189, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 19:35:20 - Bot monitoring check completed
+---
+2026-01-30 19:40:20 - Starting bot monitoring check
+2026-01-30 19:40:20 - Gateway service is RUNNING
+2026-01-30 19:40:26 - Gateway status: (node:87461) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 87189, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 19:40:26 - Bot monitoring check completed
+---
+2026-01-30 19:45:26 - Starting bot monitoring check
+2026-01-30 19:45:26 - Gateway service is RUNNING
+2026-01-30 19:45:31 - Gateway status: (node:87584) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 87189, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 19:45:31 - Bot monitoring check completed
+---
+2026-01-30 19:50:31 - Starting bot monitoring check
+2026-01-30 19:50:31 - Gateway service is RUNNING
+2026-01-30 19:50:37 - Gateway status: (node:87699) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 87189, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 19:50:37 - Bot monitoring check completed
+---
+2026-01-30 19:55:37 - Starting bot monitoring check
+2026-01-30 19:55:37 - Gateway service is RUNNING
+2026-01-30 19:55:42 - Gateway status: (node:87817) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 87189, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 19:55:42 - Bot monitoring check completed
+---
+2026-01-30 20:00:43 - Starting bot monitoring check
+2026-01-30 20:00:43 - Gateway service is RUNNING
+2026-01-30 20:00:48 - Gateway status: (node:87933) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 87189, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 20:00:48 - Bot monitoring check completed
+---
+2026-01-30 20:05:59 - Starting bot monitoring check
+2026-01-30 20:06:01 - Gateway service is RUNNING
+2026-01-30 20:12:33 - Gateway status: (node:88071) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 87189, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 20:12:33 - Bot monitoring check completed
+---
+2026-01-30 20:17:49 - Starting bot monitoring check
+2026-01-30 20:18:05 - Gateway service is RUNNING
+2026-01-30 20:19:28 - Gateway status: (node:88264) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 87189, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 20:19:28 - Bot monitoring check completed
+---
+2026-01-30 20:24:33 - Starting bot monitoring check
+2026-01-30 20:24:34 - Gateway service is RUNNING
+2026-01-30 20:25:50 - Gateway status: (node:88395) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 88363, state active)
+Warm-up: launch agents can take a few seconds. Try again shortly.
+RPC probe: failed
+RPC target: ws://127.0.0.1:18789
+  gateway closed (1006 abnormal closure (no close frame)): no close reason
+  Gateway target: ws://127.0.0.1:18789
+  Source: cli --url
+  Config: /Users/anthonypium/.clawdbot/clawdbot.json
+
+Gateway port 18789 is not listening (service appears running).
+Last gateway error: (Use `node --trace-deprecation ...` to show where the warning was created)
+Logs: ~/.clawdbot/logs/gateway.log
+Errors: ~/.clawdbot/logs/gateway.err.log
+
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 20:25:50 - Bot monitoring check completed
+---
+2026-01-30 20:30:51 - Starting bot monitoring check
+2026-01-30 20:30:51 - Gateway service is RUNNING
+2026-01-30 20:30:56 - Gateway status: (node:88508) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 88363, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 20:30:56 - Bot monitoring check completed
+---
+2026-01-30 20:35:56 - Starting bot monitoring check
+2026-01-30 20:35:56 - Gateway service is RUNNING
+2026-01-30 20:36:01 - Gateway status: (node:88635) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 88363, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 20:36:01 - Bot monitoring check completed
+---
+2026-01-30 20:41:01 - Starting bot monitoring check
+2026-01-30 20:41:01 - Gateway service is RUNNING
+2026-01-30 20:41:07 - Gateway status: (node:88782) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 88363, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 20:41:07 - Bot monitoring check completed
+---
+2026-01-30 20:46:07 - Starting bot monitoring check
+2026-01-30 20:46:07 - Gateway service is RUNNING
+2026-01-30 20:46:12 - Gateway status: (node:88897) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 88363, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 20:46:12 - Bot monitoring check completed
+---
+2026-01-30 20:51:12 - Starting bot monitoring check
+2026-01-30 20:51:12 - Gateway service is RUNNING
+2026-01-30 20:51:17 - Gateway status: (node:89002) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 88363, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 20:51:17 - Bot monitoring check completed
+---
+2026-01-30 20:56:18 - Starting bot monitoring check
+2026-01-30 20:56:18 - Gateway service is RUNNING
+2026-01-30 20:56:36 - Gateway status: (node:89119) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 88363, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 20:56:36 - Bot monitoring check completed
+---
+2026-01-30 21:23:00 - Starting bot monitoring check
+2026-01-30 21:23:38 - Gateway service is RUNNING
+2026-01-30 21:28:50 - Gateway status: (node:89230) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 89229, state active)
+Warm-up: launch agents can take a few seconds. Try again shortly.
+RPC probe: failed
+RPC target: ws://127.0.0.1:18789
+  gateway closed (1006 abnormal closure (no close frame)): no close reason
+  Gateway target: ws://127.0.0.1:18789
+  Source: cli --url
+  Config: /Users/anthonypium/.clawdbot/clawdbot.json
+
+Gateway port 18789 is not listening (service appears running).
+Last gateway error: (Use `node --trace-deprecation ...` to show where the warning was created)
+Logs: ~/.clawdbot/logs/gateway.log
+Errors: ~/.clawdbot/logs/gateway.err.log
+
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 21:28:50 - Bot monitoring check completed
+---
+2026-01-30 21:33:50 - Starting bot monitoring check
+2026-01-30 21:33:50 - Gateway service is RUNNING
+2026-01-30 21:34:09 - Gateway status: (node:89419) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 89229, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 21:34:09 - Bot monitoring check completed
+---
+2026-01-30 21:39:09 - Starting bot monitoring check
+2026-01-30 21:39:09 - Gateway service is RUNNING
+2026-01-30 21:39:15 - Gateway status: (node:89526) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 89229, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 21:39:15 - Bot monitoring check completed
+---
+2026-01-30 21:44:15 - Starting bot monitoring check
+2026-01-30 21:44:15 - Gateway service is RUNNING
+2026-01-30 21:44:24 - Gateway status: (node:89653) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 89229, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 21:44:24 - Bot monitoring check completed
+---
+2026-01-30 21:49:24 - Starting bot monitoring check
+2026-01-30 21:49:24 - Gateway service is RUNNING
+2026-01-30 21:49:30 - Gateway status: (node:89757) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 89229, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 21:49:30 - Bot monitoring check completed
+---
+2026-01-30 21:54:30 - Starting bot monitoring check
+2026-01-30 21:54:30 - Gateway service is RUNNING
+2026-01-30 21:54:35 - Gateway status: (node:89872) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 89229, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 21:54:35 - Bot monitoring check completed
+---
+2026-01-30 21:59:35 - Starting bot monitoring check
+2026-01-30 21:59:35 - Gateway service is RUNNING
+2026-01-30 21:59:41 - Gateway status: (node:89995) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 89929, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 21:59:41 - Bot monitoring check completed
+---
+2026-01-30 22:04:41 - Starting bot monitoring check
+2026-01-30 22:04:41 - Gateway service is RUNNING
+2026-01-30 22:04:46 - Gateway status: (node:90108) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 89929, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 22:04:46 - Bot monitoring check completed
+---
+2026-01-30 22:09:46 - Starting bot monitoring check
+2026-01-30 22:09:46 - Gateway service is RUNNING
+2026-01-30 22:09:51 - Gateway status: (node:90227) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 89929, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 22:09:51 - Bot monitoring check completed
+---
+2026-01-30 22:14:51 - Starting bot monitoring check
+2026-01-30 22:14:52 - Gateway service is RUNNING
+2026-01-30 22:14:57 - Gateway status: (node:90342) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 89929, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 22:14:57 - Bot monitoring check completed
+---
+2026-01-30 22:19:57 - Starting bot monitoring check
+2026-01-30 22:19:57 - Gateway service is RUNNING
+2026-01-30 22:20:05 - Gateway status: (node:90455) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 89929, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 22:20:05 - Bot monitoring check completed
+---
+2026-01-30 22:25:08 - Starting bot monitoring check
+2026-01-30 22:25:19 - Gateway service is RUNNING
+2026-01-30 22:25:46 - Gateway status: (node:90625) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 89929, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 22:25:46 - Bot monitoring check completed
+---
+2026-01-30 23:19:27 - Starting bot monitoring check
+2026-01-30 23:19:33 - Gateway service is RUNNING
+2026-01-30 23:19:54 - Gateway status: (node:90768) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+Warm-up: launch agents can take a few seconds. Try again shortly.
+RPC probe: failed
+RPC target: ws://127.0.0.1:18789
+  gateway closed (1006 abnormal closure (no close frame)): no close reason
+  Gateway target: ws://127.0.0.1:18789
+  Source: cli --url
+  Config: /Users/anthonypium/.clawdbot/clawdbot.json
+
+Gateway port 18789 is not listening (service appears running).
+Last gateway error: at processTimers (node:internal/timers:538:9)
+Logs: ~/.clawdbot/logs/gateway.log
+Errors: ~/.clawdbot/logs/gateway.err.log
+
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 23:19:54 - Bot monitoring check completed
+---
+2026-01-30 23:24:54 - Starting bot monitoring check
+2026-01-30 23:24:54 - Gateway service is RUNNING
+2026-01-30 23:24:59 - Gateway status: (node:91014) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 23:24:59 - Bot monitoring check completed
+---
+2026-01-30 23:29:59 - Starting bot monitoring check
+2026-01-30 23:29:59 - Gateway service is RUNNING
+2026-01-30 23:30:04 - Gateway status: (node:91151) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 23:30:04 - Bot monitoring check completed
+---
+2026-01-30 23:35:04 - Starting bot monitoring check
+2026-01-30 23:35:05 - Gateway service is RUNNING
+2026-01-30 23:35:12 - Gateway status: (node:91285) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 23:35:12 - Bot monitoring check completed
+---
+2026-01-30 23:40:12 - Starting bot monitoring check
+2026-01-30 23:40:12 - Gateway service is RUNNING
+2026-01-30 23:40:24 - Gateway status: (node:91390) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 23:40:24 - Bot monitoring check completed
+---
+2026-01-30 23:45:24 - Starting bot monitoring check
+2026-01-30 23:45:24 - Gateway service is RUNNING
+2026-01-30 23:45:28 - Gateway status: (node:91513) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 23:45:28 - Bot monitoring check completed
+---
+2026-01-30 23:50:28 - Starting bot monitoring check
+2026-01-30 23:50:28 - Gateway service is RUNNING
+2026-01-30 23:50:33 - Gateway status: (node:91644) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 23:50:33 - Bot monitoring check completed
+---
+2026-01-30 23:55:33 - Starting bot monitoring check
+2026-01-30 23:55:33 - Gateway service is RUNNING
+2026-01-30 23:55:37 - Gateway status: (node:91768) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-30.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-30 23:55:37 - Bot monitoring check completed
+---
+2026-01-31 00:00:37 - Starting bot monitoring check
+2026-01-31 00:00:37 - Gateway service is RUNNING
+2026-01-31 00:00:42 - Gateway status: (node:91930) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-31.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-31 00:00:42 - Bot monitoring check completed
+---
+2026-01-31 00:05:42 - Starting bot monitoring check
+2026-01-31 00:05:42 - Gateway service is RUNNING
+2026-01-31 00:05:46 - Gateway status: (node:92054) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-31.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-31 00:05:46 - Bot monitoring check completed
+---
+2026-01-31 00:10:46 - Starting bot monitoring check
+2026-01-31 00:10:47 - Gateway service is RUNNING
+2026-01-31 00:11:01 - Gateway status: (node:92241) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-31.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-31 00:11:01 - Bot monitoring check completed
+---
+2026-01-31 00:16:01 - Starting bot monitoring check
+2026-01-31 00:16:01 - Gateway service is RUNNING
+2026-01-31 00:16:46 - Gateway status: (node:92389) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-31.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-31 00:16:46 - Bot monitoring check completed
+---
+2026-01-31 00:21:46 - Starting bot monitoring check
+2026-01-31 00:21:46 - Gateway service is RUNNING
+2026-01-31 00:21:51 - Gateway status: (node:92595) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-31.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-31 00:21:51 - Bot monitoring check completed
+---
+2026-01-31 00:26:51 - Starting bot monitoring check
+2026-01-31 00:26:51 - Gateway service is RUNNING
+2026-01-31 00:26:57 - Gateway status: (node:92724) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-31.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-31 00:26:57 - Bot monitoring check completed
+---
+2026-01-31 00:31:57 - Starting bot monitoring check
+2026-01-31 00:31:57 - Gateway service is RUNNING
+2026-01-31 00:32:02 - Gateway status: (node:92840) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Service: LaunchAgent (loaded)
+File logs: /tmp/clawdbot/clawdbot-2026-01-31.log
+Command: /usr/local/bin/node /Users/anthonypium/Library/Application Support/Herd/config/nvm/versions/node/v22.22.0/lib/node_modules/clawdbot/dist/entry.js gateway --port 18789
+Service file: ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+Service env: CLAWDBOT_GATEWAY_PORT=18789
+
+Config (cli): ~/.clawdbot/clawdbot.json
+Config (service): ~/.clawdbot/clawdbot.json
+
+Gateway: bind=loopback (127.0.0.1), port=18789 (service args)
+Probe target: ws://127.0.0.1:18789
+Dashboard: http://127.0.0.1:18789/
+Probe note: Loopback-only gateway; only local clients can connect.
+
+Runtime: running (pid 90767, state active)
+RPC probe: ok
+
+Listening: 127.0.0.1:18789
+Other gateway-like services detected (best effort):
+- com.clawdbot.monitor (user, plist: /Users/anthonypium/Library/LaunchAgents/com.clawdbot.monitor.plist)
+Cleanup hint: launchctl bootout gui/$UID/com.clawdbot.gateway
+Cleanup hint: rm ~/Library/LaunchAgents/com.clawdbot.gateway.plist
+
+Recommendation: run a single gateway per machine for most setups. One gateway supports multiple agents (see docs: /gateway#multiple-gateways-same-host).
+If you need multiple gateways (e.g., a rescue bot on the same host), isolate ports + config/state (see docs: /gateway#multiple-gateways-same-host).
+
+Troubles: run clawdbot status
+Troubleshooting: https://docs.clawd.bot/troubleshooting
+2026-01-31 00:32:02 - Bot monitoring check completed
+---

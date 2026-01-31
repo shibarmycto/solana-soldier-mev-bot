@@ -1,0 +1,10 @@
+name = "solana-soldier-mevbot"
+compatibility_date = "2024-01-01"
+
+# Static site configuration
+pages_build_output_dir = "."
+
+[env.production]
+account_id = "YOUR_ACCOUNT_ID_HERE"
+workers_dev = true
+route = "solanasoldiermevbot.yourdomain.com/*"

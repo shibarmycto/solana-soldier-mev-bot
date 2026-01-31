@@ -1,0 +1,15 @@
+# Deployment configuration for Solana Soldier MEV Bot website
+# Can be used with Railway or other platforms
+
+[build]
+builder = "static"
+
+[deploy]
+domain = "solanasoldiermevbot.yourdomain.com"
+
+[variables]
+NODE_ENV = "production"
+PORT = "3000"
+
+[build.args]
+# No additional build arguments needed for static site

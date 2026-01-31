@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Soldier MEV Bot | Automated Arbitrage Trading</title>
+    <meta name="description" content="Track whole wallets, find new tokens, and execute profitable trades automatically. 100+ trades per day with anti-rug protection.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #0d0d1a 50%, #1a0d1a 100%);
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(123, 97, 255, 0.1) 0%, transparent 20%),
+                        radial-gradient(circle at 90% 80%, rgba(0, 255, 204, 0.1) 0%, transparent 20%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #7b61ff 0%, #00ffc4 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .launch-btn {
+            background: linear-gradient(135deg, #7b61ff 0%, #00ffc4 100%);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .launch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(123, 97, 255, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #7b61ff 30%, #00ffc4 70%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero h1 span {
+            display: block;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        /* CTA Buttons */
+        .cta-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 300px;
+            margin: 0 auto 60px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7b61ff 0%, #00ffc4 100%);
+            color: #000;
+            border: none;
+            padding: 18px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(123, 97, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00ffc4;
+            border: 2px solid #00ffc4;
+            padding: 18px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(0, 255, 196, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 60px 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stats h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .emergent-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cta-buttons {
+                max-width: 100%;
+            }
+            
+            .hero {
+                padding: 60px 0 40px;
+            }
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .logo-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🛡️</div>
+                <div class="logo-text">SOLANA SOLDIER</div>
+            </div>
+            <button class="launch-btn">
+                LAUNCH BOT ⚡
+            </button>
+        </header>
+
+        <section class="hero">
+            <h1>
+                <span>AUTOMATED</span>
+                <span>SOLANA</span>
+                <span>ARBITRAGE</span>
+                <span>TRADING</span>
+            </h1>
+            <p class="hero-subtitle">
+                Track whole wallets, find new tokens, and execute profitable trades automatically. 100+ trades per day with anti-rug protection.
+            </p>
+            
+            <div class="cta-buttons">
+                <button class="btn-primary">
+                    GET STARTED ⚡
+                </button>
+                <button class="btn-secondary">
+                    LEARN MORE
+                </button>
+            </div>
+        </section>
+
+        <section class="stats">
+            <h2>Live Stats</h2>
+            <div class="cloudflare-badge">
+                Powered by Cloudflare
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2024 Solana Soldier MEV Bot. Built by CF Dev. All rights reserved.</p>
+            <p>Disclaimer: Cryptocurrency investments carry inherent risks. Trade responsibly.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Smooth scrolling for buttons
+            const buttons = document.querySelectorAll('.btn-primary, .btn-secondary, .launch-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Animation feedback
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                    
+                    // In a real implementation, this would trigger the actual action
+                    alert('Functionality would be implemented in the full application');
+                });
+            });
+
+            // Parallax effect for background
+            document.addEventListener('mousemove', (e) => {
+                const x = (window.innerWidth - e.pageX * 2) / 50;
+                const y = (window.innerHeight - e.pageY * 2) / 50;
+                document.body.style.backgroundPosition = `${x}px ${y}px`;
+            });
+        });
+    </script>
+</body>
+</html>

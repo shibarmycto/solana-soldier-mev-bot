@@ -1,0 +1,21 @@
+# Dependencies for development and production
+node_modules/
+npm-debug.log*
+
+# Environment variables
+.env
+
+# Secrets
+secrets.json
+
+# Logs
+logs/
+*.log
+
+# Build outputs
+dist/
+build/
+
+# OS generated files
+.DS_Store
+Thumbs.db

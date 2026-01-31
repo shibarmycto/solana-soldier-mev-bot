@@ -1,10 +1,51 @@
+# Core dependencies
+python-telegram-bot==20.7
+anthropic==0.18.1
+python-dotenv==1.0.0
+
+# Database
+sqlalchemy==2.0.25
+alembic==1.13.1
+redis==5.0.1
+psycopg2-binary==2.9.9
+
+# AI and ML
+langchain==0.1.6
+chromadb==0.4.22
+openai==1.1.0
+
+# Remote control
+adb-shell==0.4.4
+pure-python-adb==0.3.0.dev0
+paramiko==3.4.0
+pyautogui==0.9.54
+python-vnc-viewer==0.0.1
+
+# Form automation
+selenium==4.17.2
+playwright==1.41.2
+beautifulsoup4==4.12.3
+PyPDF2==3.0.1
+python-docx==1.1.0
+
+# Message automation
+imaplib2==3.6
+python-whatsapp==0.1.0
+
+# Utilities
+requests==2.31.0
+cryptography==42.0.2
+pillow==10.2.0
+pandas==2.2.0
+schedule==1.2.0
+pydantic==2.6.0
+pydantic-settings==2.1.0
+
+# Solana dependencies (keep for existing functionality)
 aiohttp==3.9.1
 websockets==12.0
 solana==0.30.2
 solders==0.19.0
 base58==2.1.1
-python-dotenv==1.0.0
 asyncio==3.4.3
-requests==2.31.0
-cryptography==41.0.8
 web3==6.15.1

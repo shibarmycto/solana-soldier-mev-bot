@@ -1,1 +1,1 @@
-worker: python solana_soldier_mev_bot.py
+worker: cd claude-remote-assistant && python main.py

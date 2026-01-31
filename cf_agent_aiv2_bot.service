@@ -1,0 +1,16 @@
+[Unit]
+Description=CF Agent AIV2 Bot
+After=network.target
+
+[Service]
+Type=simple
+User=anthonypium
+WorkingDirectory=/Users/anthonypium/Desktop/CF_AI_Agent
+ExecStart=/usr/bin/python3 /Users/anthonypium/Desktop/CF_AI_Agent/cf_agent_aiv2_bot_minimal_reverted.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

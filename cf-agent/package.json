@@ -1,0 +1,28 @@
+{
+  "name": "matrix-ai-agent",
+  "version": "1.0.0",
+  "description": "Matrix AI Agent with Agent Zero and Clawdbot integration",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "cf-typegen": "wrangler types"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "matrix",
+    "cloudflare"
+  ],
+  "author": "Meme Corp",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20230419.0",
+    "typescript": "^5.0.0",
+    "wrangler": "^3.0.0"
+  },
+  "dependencies": {
+    "agent-zero": "latest",
+    "clawdbot": "latest"
+  }
+}

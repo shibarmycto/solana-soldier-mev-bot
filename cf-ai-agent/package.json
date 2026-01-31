@@ -1,0 +1,40 @@
+{
+  "name": "cf-ai-agent-matrix-interface",
+  "version": "1.0.0",
+  "description": "Matrix-style interface for CF AI Agent worker bot",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "deploy": "echo 'Deploy with Cloudflare Pages or Workers'"
+  },
+  "keywords": [
+    "cloudflare",
+    "ai",
+    "agent",
+    "matrix",
+    "cyberpunk",
+    "worker",
+    "bot",
+    "interface"
+  ],
+  "author": "CF Dev",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.22.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cf-dev/cf-ai-agent"
+  },
+  "bugs": {
+    "url": "https://github.com/cf-dev/cf-ai-agent/issues"
+  },
+  "homepage": "https://github.com/cf-dev/cf-ai-agent#readme"
+}

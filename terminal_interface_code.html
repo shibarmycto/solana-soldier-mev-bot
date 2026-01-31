@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Hub Terminal Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .terminal-card {
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .terminal-header {
+            background-color: rgba(0, 20, 20, 0.7);
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        
+        .terminal-content {
+            padding: 20px;
+            height: calc(100vh - 180px);
+            overflow-y: auto;
+        }
+        
+        .terminal-input-area {
+            padding: 15px;
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .terminal-prompt {
+            color: #00ffff;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #00ffff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+        }
+        
+        .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background-color: #00ffff;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .matrix-glow {
+            text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+        }
+        
+        .pulse-glow {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 5px rgba(0, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(0, 255, 255, 0.5); }
+        }
+        
+        .badge-matrix {
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-card">
+        <div class="terminal-header">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                        <polyline points="4 17 10 11 4 5"></polyline>
+                        <line x1="12" y1="19" x2="20" y2="19"></line>
+                    </svg>
+                    <span class="font-['Share_Tech_Mono']">ROOT_TERMINAL</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-400 transition-colors"></button>
+                    <button class="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400 transition-colors"></button>
+                    <button class="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors"></button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="terminal-output" class="terminal-content font-['JetBrains_Mono'] text-sm space-y-1">
+            <div class="text-green-400">CFAIAGENT TERMINAL v1.0.0</div>
+            <div class="text-green-400">Type 'help' for available commands</div>
+            <div class="text-green-400">----------------------------------------</div>
+            <div class="text-green-400">root@cfaiagent:~$ </div>
+        </div>
+        
+        <div class="terminal-input-area">
+            <span class="terminal-prompt">root@cfaiagent:~$</span>
+            <input 
+                type="text" 
+                id="terminal-input" 
+                class="terminal-input" 
+                autofocus
+                autocomplete="off"
+                spellcheck="false"
+            >
+            <span class="cursor-blink"></span>
+        </div>
+    </div>
+
+    <script>
+        const terminalOutput = document.getElementById('terminal-output');
+        const terminalInput = document.getElementById('terminal-input');
+        
+        // Command history
+        let commandHistory = [];
+        let historyIndex = -1;
+        
+        // Focus input when clicking anywhere in the terminal
+        document.querySelector('.terminal-card').addEventListener('click', () => {
+            terminalInput.focus();
+        });
+        
+        // Handle command submission
+        terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const command = terminalInput.value.trim();
+                
+                if (command) {
+                    // Add command to history
+                    commandHistory.push(command);
+                    historyIndex = commandHistory.length;
+                    
+                    // Display command in terminal
+                    addOutput(`root@cfaiagent:~$ ${command}`, 'input');
+                    
+                    // Process command
+                    processCommand(command);
+                    
+                    // Clear input
+                    terminalInput.value = '';
+                } else {
+                    // Just add a new prompt if empty command
+                    addOutput(`root@cfaiagent:~$ `, 'input');
+                }
+            } else if (e.key === 'ArrowUp') {
+                // Navigate command history
+                e.preventDefault();
+                if (commandHistory.length > 0) {
+                    if (historyIndex <= 0) {
+                        historyIndex = commandHistory.length;
+                    }
+                    historyIndex--;
+                    terminalInput.value = commandHistory[historyIndex] || '';
+                }
+            } else if (e.key === 'ArrowDown') {
+                // Navigate command history
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    terminalInput.value = commandHistory[historyIndex] || '';
+                } else {
+                    historyIndex = commandHistory.length;
+                    terminalInput.value = '';
+                }
+            }
+        });
+        
+        function addOutput(text, type = '') {
+            const outputDiv = document.createElement('div');
+            outputDiv.className = type === 'input' ? 'text-cyan-400' : 
+                                 type === 'error' ? 'text-red-400' : 
+                                 'text-green-300';
+            outputDiv.textContent = text;
+            terminalOutput.appendChild(outputDiv);
+            
+            // Scroll to bottom
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+        
+        function processCommand(command) {
+            const cmd = command.toLowerCase();
+            
+            switch(cmd) {
+                case 'help':
+                    addOutput('Available commands:', 'output');
+                    addOutput('- help: Show this help message', 'output');
+                    addOutput('- clear: Clear the terminal', 'output');
+                    addOutput('- about: Show information about the system', 'output');
+                    addOutput('- status: Show system status', 'output');
+                    addOutput('- exit: Close the terminal', 'output');
+                    break;
+                    
+                case 'clear':
+                    // Clear all except the header
+                    const headerElements = terminalOutput.querySelectorAll(':first-child, :nth-child(2), :nth-child(3)');
+                    terminalOutput.innerHTML = '';
+                    headerElements.forEach(el => terminalOutput.appendChild(el));
+                    addOutput(`root@cfaiagent:~$ `, 'input');
+                    break;
+                    
+                case 'about':
+                    addOutput('CFAIAGENT Terminal System v1.0.0', 'output');
+                    addOutput('Designed for AI agent task management and execution.', 'output');
+                    break;
+                    
+                case 'status':
+                    addOutput('System Status: Operational', 'output');
+                    addOutput('Agents Online: 12 Active', 'output');
+                    addOutput('Tasks Queued: 3', 'output');
+                    addOutput('Performance: Optimal', 'output');
+                    break;
+                    
+                case 'exit':
+                    addOutput('Closing terminal session...', 'output');
+                    setTimeout(() => {
+                        addOutput('Session ended. Refresh page to reconnect.', 'error');
+                    }, 1000);
+                    break;
+                    
+                case 'ls':
+                    addOutput('ai_agents  task_queue  logs  config', 'output');
+                    break;
+                    
+                case 'whoami':
+                    addOutput('root@cfaiagent', 'output');
+                    break;
+                    
+                default:
+                    addOutput(`Command not recognized: ${command}`, 'error');
+                    addOutput('Type "help" for available commands', 'output');
+            }
+        }
+        
+        // Initialize terminal with a welcome message
+        setTimeout(() => {
+            addOutput(`Welcome to CFAIAGENT Terminal`, 'output');
+            addOutput(`System initialized and ready for commands.`, 'output');
+            addOutput(`root@cfaiagent:~$ `, 'input');
+        }, 500);
+    </script>
+</body>
+</html>
