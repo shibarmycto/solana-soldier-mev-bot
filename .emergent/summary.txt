@@ -1,0 +1,183 @@
+<analysis>**original_problem_statement:**
+The user wants to create a Solana arbitrage trading bot named Solana Soldier, integrated with a Telegram interface.
+
+**PRODUCT REQUIREMENTS:**
+- **Core Functionality:**
+    - Track whale wallets using  and  to identify arbitrage opportunities with new coins.
+    - Execute trades automatically, aiming for a  profit per trade before exiting. The minimum trade amount was later set to 0.02 SOL.
+    - Trades must be completed within 2 minutes.
+    - Account for gas fees in profit calculations.
+    - Target at least 100 trades per day.
+- **Wallet Management:**
+    - The bot must create a new, unique Solana wallet for each user and provide them with the private key.
+- **Telegram Bot Interface:**
+    - Provide commands for users to interact with the bot (e.g., wallet creation, balance check, trading).
+    - Use UI buttons for an easier user experience.
+    - Report successful trades and profits back to the user via Telegram.
+- **User & Payment System:**
+    - An admin account () should manage the bot.
+    - The admin can grant usage credits to users (e.g., ).
+    - Standard user access costs £100 per day, payable via specified Solana, ETH, or Bitcoin addresses.
+    - Admins who sign up should get free, unlimited access automatically.
+- **Advanced Trading Features:**
+    - Integrate with Jupiter DEX for executing swaps.
+    - Implement real-time transaction monitoring using Helius RPC and WebSockets.
+    - Develop a rug pull detection algorithm.
+    - Implement P&L (Profit & Loss) tracking and reporting.
+    - Include a stop-loss feature for risk management.
+- **Privacy & Customization:**
+    - The list of preset whale wallets should only be visible to admins.
+    - Regular users should not see the preset wallets on the website or via bot commands.
+    - Users must be able to add and manage their own list of wallets to track.
+
+**User's preferred language**: English
+
+**what currently exists?**
+A full-stack application with a FastAPI backend and a React frontend. The backend integrates a Telegram bot (), connects to MongoDB (), and features a sophisticated trading engine (). This engine uses the Jupiter DEX API for swaps, Helius RPC for live data and transactions, and WebSockets for real-time whale monitoring. The frontend is a single-page dashboard () displaying statistics and trading information. The application supports user registration, a credit-based payment system, and live trading capabilities controlled via environment variables.
+
+**Last working item**:
+-   **Last item agent was working:** The agent was responding to the user's urgent request to restore the codebase. The user reported they had messed up the code while the agent was offline, causing the Telegram bot to become non-functional. The agent's immediate task is to diagnose the current state and revert the application back to its last known stable version, ensuring that live trading is operational.
+-   **Status:** NOT STARTED
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** backend testing agent. The primary issue lies in the backend logic, specifically the Telegram bot's functionality and its interaction with the async event loop. End-to-end testing is required to confirm the bot starts correctly, responds to commands, and can execute trades.
+-   **User Testing Done:** N (User reported the bot is broken)
+
+**All Pending/In progress Issue list**:
+-   **Issue 1 (P0): Bot is broken and requires restoration.**
+    -   **Description:** The user has manually altered the code, leading to a non-functional Telegram bot. The core task is to restore the application to the last stable state where live trading was working.
+    -   **Attempted fixes:** None. The agent was just about to begin investigation when the session ended.
+    -   **Next debug checklist:**
+        1.  Since there is no version control, a restore means reimplementing the last stable state.
+        2.  The last stable state included the  loop fix ( function) which is critical for the Telegram bot's operation. This must be verified.
+        3.  The agent should focus on re-implementing and completing the last feature request (admin roles and user-specific wallet tracking), as the user's intervention likely corrupted this in-progress work.
+        4.  Review  and  to ensure all components are correctly implemented as per the last successful iteration.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a critical blocker. Fixing it will make the bot operational again, which is the user's primary requirement.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Both. The backend is the priority to ensure the bot functions. The frontend needs to be checked to ensure UI elements related to the last feature are correct.
+    -   **Blocked on other issue:** No.
+
+**In progress Task List**:
+-   **Task 1 (P0): Implement Admin/User Roles and Wallet Tracking Privacy.**
+    -   **Description:** This task was interrupted by the user. It involves creating a distinction between admin and regular users.
+    -   **Where to resume:** This task should be implemented fresh as part of the restore process.
+        -   **Backend ():**
+            1.  Modify the  command to automatically grant admin privileges and free access to the designated admin user.
+            2.  Implement commands for users to manage their own tracked wallets (, ).
+            3.  Restrict the  command to show the preset list to admins only.
+        -   **Frontend ():**
+            1.  Remove the hardcoded list of whale wallets from the public landing page.
+            2.  Ensure the dashboard's Whales tab displays data based on user roles (preset list for admin, user's custom list for others).
+    -   **What will be achieved with this?** This will fulfill a key user requirement for privacy and role-based access, making the application more secure and personalized.
+    -   **Status:** IN PROGRESS (Corrupted by user, needs to be redone)
+    -   **Should Test frontend/backend/both after fix?** Both.
+    -   **Blocked on something:** This task is intertwined with Issue 1. They should be resolved together.
+
+**Upcoming and Future Tasks**
+- No new features have been requested by the user. The focus is on stabilizing the current feature set.
+
+**Completed work in this session**
+- **Phase 1: MVP Bot & Frontend:** Established the basic FastAPI backend, React frontend, and Telegram bot integration.
+- **Phase 2: Trading Engine v1:** Built the initial  with Jupiter DEX integration and rug-check logic.
+- **Phase 3: Live Trading:** Integrated Helius RPC and WebSockets, enabling live and auto-trading functionalities.
+- **Phase 4: P&L and Stop-Loss:** Enhanced the trading engine with profit/loss tracking and a stop-loss mechanism.
+- **Bug Fix:** Corrected the Telegram bot's URL on the frontend.
+- **Critical Bug Fix:** Resolved an  event loop conflict between the Telegram bot and the MongoDB driver by creating a separate database client for bot handlers.
+
+**Earlier issues found/mentioned but not fixed**
+-   **Issue 1: Solscan API Returns 401 Unauthorized.**
+    -   **Description:** Throughout the session, logs showed that API calls to Solscan were failing with a 401 error. The agent worked around this for trending tokens by using DexScreener, but other features like whale activity monitoring might be degraded.
+    -   **Debug checklist:**
+        1.  Verify the API key is correct in .
+        2.  Check the Solscan API documentation for the correct authentication header. The current implementation uses , which might be incorrect. It's likely a different header like  is required.
+    -   **Why to solve this issue and what will be achieved with this?** Fixing this will make the bot's intelligence features (whale tracking, rug detection) more reliable and robust.
+    -   **Should Test frontend/backend/both after fix:** Backend.
+    -   **Is recurring issue?** Y
+
+**Known issue recurrence from previous fork**
+- None.
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+- **Backend:** FastAPI, ,  (async MongoDB), , usage: websockets [--version | <uri>].
+- **Frontend:** React, TailwindCSS, .
+- **Database:** MongoDB.
+- **Integrations:** Telegram API, Jupiter DEX, Helius RPC, Solscan API, DexScreener API.
+
+**key DB schema**
+-   : 
+-   : 
+-   : 
+
+**changes in tech stack**
+- None.
+
+**All files of reference**
+-   : The main application file containing API endpoints and Telegram bot command handlers. It's the most critical and frequently changed file.
+-   : Contains all complex trading logic, WebSocket handling, and third-party API interactions.
+-   : Contains the entire frontend application.
+-   : Stores all secrets, API keys, and feature flags.
+
+**Areas that need refactoring**:
+-   : This is a very large single-file component that should be broken down into smaller, reusable components (e.g., , , ).
+-   : This file is over 1700 lines. The Telegram bot logic (command handlers, callbacks) should be extracted into a separate module to improve maintainability.
+
+**key api endpoints**
+-   : Health check.
+-   : General bot statistics.
+-   : Provides a list of trending tokens.
+-   : Shows the current status of live trading and other features.
+-   : Returns overall profit and loss statistics.
+
+**Critical Info for New Agent**
+-   Your immediate priority is to address the user's report that the bot is broken. This is not a simple bug fix but a restoration of the last known working state, as the user admits to modifying the code.
+-   You must re-implement the feature that was in progress: admin/user roles and user-specific wallet tracking. This was likely corrupted by the user's changes.
+-   Pay close attention to the  event loop fix for the Telegram bot ( function in ). This is a critical piece of the architecture that prevents the bot from crashing.
+-   The Solscan API is currently failing with a 401 error. While not the top priority, fixing this is necessary for the bot's full functionality.
+
+**documents and test reports created in this job**
+-   
+-   
+-   
+-   
+-   
+-   
+
+**Last 10 User Messages and any pending HUMAN messages**
+1.  **User:** Bot launch button on the website is broken.
+2.  **User:** Confirmed the link fix and asked for a summary.
+3.  **User:** Not is not starting or working (with a screenshot showing the bot as unresponsive).
+4.  **User:** Requested privacy features: hide preset whale wallets from users, allow users to add their own wallets, and give admins free access.
+5.  **User (PENDING & CRITICAL):** While you was sleeping I messed up the code can you restore it to what you done when you pushed it to forked for me need it back to that version the telegram bot is messed up at the moment and make sure it can execute real trades
+
+**Project Health Check:**
+-   **Broken:**
+    -   The core Telegram bot functionality is reported as non-operational by the user.
+    -   The Solscan API integration is failing with  errors.
+-   **Mocked:** None. All integrations are live.
+
+**3rd Party Integrations**
+-   **Telegram Bot API:** Used via .
+-   **Solscan API:** Requires a user-provided API key. **(Currently failing)**.
+-   **Jupiter DEX API:** Public API for swaps.
+-   **Helius RPC API:** Requires a user-provided API key for real-time data and transactions.
+-   **DexScreener API:** Public API used as a fallback for trending tokens.
+
+**Testing status**
+-   **Testing agent used after significant changes:** YES
+-   **Troubleshoot agent used after agent stuck in loop:** NO
+-   **Test files created:** None.
+-   **Known regressions:** The Telegram bot functionality has regressed and is currently broken.
+
+**Credentials to test flow:**
+-   **Telegram Bot Token:** 
+-   **Telegram Admin User:** 
+-   **Telegram Admin Chat ID for testing:** 
+-   **Helius API Key:** 
+-   **Solscan API Key:** 
+
+**What agent forgot to execute**
+-   The agent never fixed the recurring  error for the Solscan API, despite acknowledging it multiple times. This leaves a core data source for the bot's trading intelligence unreliable.
+-   The agent was interrupted while implementing the user's request for admin/user roles and privacy features. This task was not completed.</analysis>
