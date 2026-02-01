@@ -97,15 +97,15 @@ class TestWhaleTracking:
         assert response.status_code == 200
         data = response.json()
         
-        assert "wallets" in data
-        wallets = data.get("wallets", [])
-        assert len(wallets) == 9  # 9 whale wallets configured
+        assert "whales" in data
+        whales = data.get("whales", [])
+        assert len(whales) == 9  # 9 whale wallets configured
         
         # Verify wallet addresses are valid Solana addresses (32-50 chars)
-        for wallet in wallets:
+        for wallet in whales:
             assert len(wallet) >= 32 and len(wallet) <= 50
         
-        print(f"✅ Whales endpoint passed: {len(wallets)} whale wallets tracked")
+        print(f"✅ Whales endpoint passed: {len(whales)} whale wallets tracked")
     
     def test_whale_activities_endpoint(self):
         """Test /api/whale-activities returns whale activity list"""
