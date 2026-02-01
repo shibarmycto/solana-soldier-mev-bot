@@ -199,7 +199,7 @@ const LandingPage = () => {
             <div className="space-y-4">
               <div className="flex justify-between items-center border-b border-white/10 pb-3">
                 <span className="text-gray-400">Tracked Whales</span>
-                <span className="font-mono text-[#14F195] text-xl">{WHALE_WALLETS.length}+</span>
+                <span className="font-mono text-[#14F195] text-xl">{TRACKED_WHALES_COUNT}+</span>
               </div>
               <div className="flex justify-between items-center border-b border-white/10 pb-3">
                 <span className="text-gray-400">Daily Trades</span>
