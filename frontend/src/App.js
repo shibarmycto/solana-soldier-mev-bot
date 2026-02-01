@@ -37,6 +37,9 @@ const PAYMENT_ADDRESSES = {
   BTC: "bc1p3red8wgfa9k2qyhxxj9vpnehvy29ld63lg5t6kfvrcy6lz7l9mhspyjk3k"
 };
 
+// Number of tracked whale wallets (fetched from API, fallback to this)
+const TRACKED_WHALES_COUNT = 9;
+
 // Stat Card Component
 const StatCard = ({ icon: Icon, label, value, color, delay = 0 }) => (
   <motion.div
