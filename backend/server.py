@@ -2853,6 +2853,111 @@ async def get_user_pnl(telegram_id: int):
         "win_rate": (winning / total_trades * 100) if total_trades else 0
     }
 
+@api_router.get("/leaderboard")
+async def get_leaderboard():
+    """Get profit leaderboard"""
+    tg_db = get_telegram_db()
+    
+    pipeline = [
+        {"$group": {
+            "_id": "$user_telegram_id",
+            "total_profit": {"$sum": "$profit_usd"},
+            "total_trades": {"$sum": 1},
+            "successful_trades": {
+                "$sum": {"$cond": [{"$eq": ["$status", "COMPLETED"]}, 1, 0]}
+            }
+        }},
+        {"$sort": {"total_profit": -1}},
+        {"$limit": 20}
+    ]
+    
+    leaderboard = await tg_db.trades.aggregate(pipeline).to_list(20)
+    
+    # Enrich with usernames
+    results = []
+    for entry in leaderboard:
+        user = await tg_db.users.find_one({"telegram_id": entry["_id"]}, {"_id": 0, "username": 1})
+        results.append({
+            "telegram_id": entry["_id"],
+            "username": user.get("username", "Anonymous") if user else "Anonymous",
+            "total_profit": entry["total_profit"],
+            "total_trades": entry["total_trades"],
+            "successful_trades": entry["successful_trades"],
+            "win_rate": (entry["successful_trades"] / entry["total_trades"] * 100) if entry["total_trades"] > 0 else 0
+        })
+    
+    return {"leaderboard": results}
+
+@api_router.get("/admin/dashboard")
+async def get_admin_dashboard():
+    """Get admin dashboard data"""
+    tg_db = get_telegram_db()
+    
+    total_users = await tg_db.users.count_documents({})
+    total_wallets = await tg_db.wallets.count_documents({"is_active": True})
+    total_trades = await tg_db.trades.count_documents({})
+    pending_payments = await tg_db.payments.count_documents({"status": "PENDING_VERIFICATION"})
+    
+    trades = await tg_db.trades.find({}, {"_id": 0, "profit_usd": 1, "status": 1}).to_list(10000)
+    total_profit = sum(t.get('profit_usd', 0) for t in trades)
+    successful = sum(1 for t in trades if t.get('status') == 'COMPLETED')
+    
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today_trades = await tg_db.trades.count_documents({"created_at": {"$gte": today.isoformat()}})
+    today_signups = await tg_db.users.count_documents({"created_at": {"$gte": today.isoformat()}})
+    
+    return {
+        "total_users": total_users,
+        "total_wallets": total_wallets,
+        "total_trades": total_trades,
+        "total_profit_usd": total_profit,
+        "pending_payments": pending_payments,
+        "active_traders": len(active_trading_users),
+        "successful_trades": successful,
+        "win_rate": (successful / total_trades * 100) if total_trades > 0 else 0,
+        "today_trades": today_trades,
+        "today_signups": today_signups,
+        "live_trading_enabled": LIVE_TRADING_ENABLED,
+        "auto_trade_enabled": AUTO_TRADE_ON_WHALE_SIGNAL,
+        "tracked_whales": len(WHALE_WALLETS)
+    }
+
+@api_router.get("/faucets")
+async def get_faucets():
+    """Get available crypto faucets"""
+    if soldiers_army:
+        return {
+            "faucets": soldiers_army.get_faucet_list(),
+            "stats": soldiers_army.get_faucet_stats()
+        }
+    return {"faucets": [], "stats": {}}
+
+@api_router.get("/mining-sessions")
+async def get_mining_sessions():
+    """Get all mining sessions"""
+    sessions = await get_telegram_db().mining_sessions.find({}, {"_id": 0}).sort("started_at", -1).to_list(100)
+    return {"sessions": sessions}
+
+@api_router.get("/nft/trending/{chain}")
+async def get_nft_trending(chain: str = "solana"):
+    """Get trending NFT collections"""
+    if nft_aggregator:
+        collections = await nft_aggregator.get_trending_collections(chain, limit=20)
+        return {"collections": [
+            {
+                "name": c.name,
+                "symbol": c.symbol,
+                "marketplace": c.marketplace,
+                "chain": c.chain,
+                "floor_price": c.floor_price,
+                "currency": c.currency,
+                "volume_24h": c.volume_24h,
+                "listed_count": c.listed_count,
+                "verified": c.verified
+            } for c in collections
+        ]}
+    return {"collections": []}
+
 # Include router
 app.include_router(api_router)
 
