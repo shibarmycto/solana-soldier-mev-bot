@@ -2237,6 +2237,330 @@ Or send a message here and we'll respond ASAP!
             parse_mode='Markdown'
         )
     
+    # ============== NEW CALLBACK HANDLERS ==============
+    
+    elif data.startswith("trade_amount_"):
+        # User selected a trade amount
+        if "insufficient" in data:
+            await query.answer("❌ Insufficient balance for this amount!", show_alert=True)
+            return
+        
+        amount_usd = int(data.replace("trade_amount_", ""))
+        
+        # Store user's selected amount
+        if telegram_id not in user_trade_settings:
+            user_trade_settings[telegram_id] = {}
+        user_trade_settings[telegram_id]['trade_amount_usd'] = amount_usd
+        
+        # Show confirmation with Start Trade button
+        keyboard = [
+            [InlineKeyboardButton("🚀 START TRADING", callback_data=f"confirm_start_trade_{amount_usd}")],
+            [InlineKeyboardButton("⚙️ Change Stop-Loss", callback_data="change_stop_loss")],
+            [InlineKeyboardButton("🔙 Back", callback_data="back_quicktrade")]
+        ]
+        
+        sol_price = await get_sol_price()
+        amount_sol = amount_usd / sol_price
+        
+        await query.edit_message_text(
+            f"""
+⚡ *CONFIRM TRADE SETTINGS* ⚡
+━━━━━━━━━━━━━━━━━━━━━
+
+*Trade Amount:* ${amount_usd} (~{amount_sol:.4f} SOL)
+*Stop-Loss:* {DEFAULT_STOP_LOSS_PCT*100:.0f}%
+*Profit Target:* ${MIN_PROFIT_USD}
+*Max Time:* {MAX_TRADE_TIME_SECONDS}s
+
+The bot will:
+1. 🐋 Monitor whale wallets 24/7
+2. 🔍 Detect new token buys
+3. 🛡️ Run rug-check
+4. ⚡ Execute quick in/out trades
+5. 💰 Exit at ${MIN_PROFIT_USD}+ profit or stop-loss
+
+Press START to begin auto-trading!
+""",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='Markdown'
+        )
+    
+    elif data.startswith("confirm_start_trade_"):
+        # User confirmed - start trading
+        amount_usd = int(data.replace("confirm_start_trade_", ""))
+        
+        # Get wallet and check balance
+        wallet = await get_telegram_db().wallets.find_one(
+            {"user_telegram_id": telegram_id, "is_active": True},
+            {"_id": 0}
+        )
+        
+        if not wallet:
+            await query.edit_message_text("❌ No wallet found. Use /newwallet first.")
+            return
+        
+        sol_price = await get_sol_price()
+        amount_sol = amount_usd / sol_price
+        
+        # Check balance
+        if helius_rpc:
+            balance = await helius_rpc.get_balance(wallet['public_key'])
+            if balance < amount_sol + 0.01:
+                await query.edit_message_text(
+                    f"❌ Insufficient balance.\n\nRequired: {amount_sol + 0.01:.4f} SOL\nAvailable: {balance:.4f} SOL\n\nFund your wallet:\n`{wallet['public_key']}`",
+                    parse_mode='Markdown'
+                )
+                return
+        
+        # Create keypair and add to active traders
+        try:
+            keypair = Keypair.from_base58_string(wallet['private_key_encrypted'])
+        except:
+            keypair = Keypair.from_bytes(base58.b58decode(wallet['private_key_encrypted']))
+        
+        active_trading_users[telegram_id] = {
+            'keypair': keypair,
+            'trade_amount': amount_sol,
+            'trade_amount_usd': amount_usd,
+            'stop_loss_pct': DEFAULT_STOP_LOSS_PCT,
+            'wallet_public_key': wallet['public_key'],
+            'started_at': datetime.now(timezone.utc).isoformat()
+        }
+        
+        keyboard = [
+            [InlineKeyboardButton("📊 View Positions", callback_data="view_positions")],
+            [InlineKeyboardButton("🛑 STOP TRADING", callback_data="stop_auto_trade")]
+        ]
+        
+        await query.edit_message_text(
+            f"""
+🚀 *AUTO-TRADING ACTIVATED!* 🚀
+━━━━━━━━━━━━━━━━━━━━━
+
+*Settings:*
+• Trade Amount: ${amount_usd} ({amount_sol:.4f} SOL)
+• Stop-Loss: {DEFAULT_STOP_LOSS_PCT*100:.0f}%
+• Profit Target: ${MIN_PROFIT_USD}
+
+*Status:* 🟢 LIVE
+
+Your bot is now monitoring {len(WHALE_WALLETS)} whale wallets.
+You'll receive real-time notifications for every trade!
+
+Trade reports will be sent automatically.
+""",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='Markdown'
+        )
+        
+        # Send confirmation to user
+        logger.info(f"✅ User {telegram_id} started auto-trading with ${amount_usd}")
+    
+    elif data == "stop_auto_trade":
+        if telegram_id in active_trading_users:
+            del active_trading_users[telegram_id]
+            await query.edit_message_text(
+                "🛑 *AUTO-TRADING STOPPED*\n\nYour bot has stopped trading. Use /quicktrade to start again.",
+                parse_mode='Markdown'
+            )
+        else:
+            await query.answer("No active trading session.", show_alert=True)
+    
+    elif data == "view_positions":
+        if auto_trader:
+            positions = await auto_trader.get_active_positions()
+            if positions:
+                text = "📊 *ACTIVE POSITIONS* 📊\n\n"
+                for p in positions[:5]:
+                    text += f"• {p.get('token_symbol', 'UNKNOWN')}: {p.get('amount_sol', 0):.4f} SOL\n"
+                    text += f"  Entry: ${p.get('entry_price', 0):.6f} | Current: ${p.get('current_price', 0):.6f}\n\n"
+            else:
+                text = "📊 *POSITIONS* 📊\n\nNo active positions. Waiting for whale signals..."
+        else:
+            text = "📊 No positions data available."
+        
+        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="back_trading")]]
+        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+    
+    elif data == "back_quicktrade":
+        # Go back to trade amount selection
+        wallet = await get_telegram_db().wallets.find_one(
+            {"user_telegram_id": telegram_id, "is_active": True},
+            {"_id": 0}
+        )
+        balance_sol = 0
+        if wallet and helius_rpc:
+            balance_sol = await helius_rpc.get_balance(wallet['public_key'])
+        
+        sol_price = await get_sol_price()
+        balance_usd = balance_sol * sol_price
+        
+        keyboard = []
+        row = []
+        for i, amount in enumerate(TRADE_AMOUNTS):
+            if balance_usd >= amount:
+                row.append(InlineKeyboardButton(f"${amount}", callback_data=f"trade_amount_{amount}"))
+            else:
+                row.append(InlineKeyboardButton(f"${amount} ❌", callback_data=f"trade_amount_insufficient_{amount}"))
+            if len(row) == 4:
+                keyboard.append(row)
+                row = []
+        if row:
+            keyboard.append(row)
+        keyboard.append([InlineKeyboardButton("❌ Cancel", callback_data="back_main")])
+        
+        await query.edit_message_text(
+            f"⚡ *QUICK TRADE* ⚡\n\n*Balance:* {balance_sol:.4f} SOL (~${balance_usd:.2f})\n\nSelect trade amount:",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='Markdown'
+        )
+    
+    elif data == "back_trading":
+        if telegram_id in active_trading_users:
+            keyboard = [
+                [InlineKeyboardButton("📊 View Positions", callback_data="view_positions")],
+                [InlineKeyboardButton("🛑 STOP TRADING", callback_data="stop_auto_trade")]
+            ]
+            await query.edit_message_text(
+                "🚀 *AUTO-TRADING ACTIVE* 🚀\n\nYour bot is monitoring whales.",
+                reply_markup=InlineKeyboardMarkup(keyboard),
+                parse_mode='Markdown'
+            )
+        else:
+            await query.edit_message_text(
+                "Use /quicktrade to start trading.",
+                parse_mode='Markdown'
+            )
+    
+    elif data.startswith("deploy_soldiers_"):
+        num_agents = int(data.replace("deploy_soldiers_", ""))
+        
+        # Check credits
+        user = await get_telegram_db().users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        credits = user.get('credits', 0) if user else 0
+        
+        if credits < SOLDIERS_COST:
+            await query.answer("❌ Insufficient credits!", show_alert=True)
+            return
+        
+        # Deduct credits
+        await get_telegram_db().users.update_one(
+            {"telegram_id": telegram_id},
+            {"$inc": {"credits": -SOLDIERS_COST}}
+        )
+        
+        # Deploy soldiers
+        if soldiers_army:
+            await query.edit_message_text("🚀 *DEPLOYING SOLDIERS...*\n\nInitializing proxy pool and agents...", parse_mode='Markdown')
+            session = await soldiers_army.deploy_soldiers(telegram_id, num_agents=num_agents, duration_hours=24)
+            
+            await query.edit_message_text(
+                f"""
+🤖 *SOLDIERS DEPLOYED!* 🤖
+━━━━━━━━━━━━━━━━━━━━━
+
+*Session:* `{session.session_id[:20]}...`
+*Agents:* {num_agents} deployed
+*Duration:* 24 hours
+*Faucets:* {len(CRYPTO_FAUCETS)} targets
+
+Your soldiers are now mining crypto!
+
+Use /missionstatus to check progress.
+""",
+                parse_mode='Markdown'
+            )
+        else:
+            await query.edit_message_text("❌ Soldiers system not available.")
+    
+    elif data.startswith("nft_trending_"):
+        chain = data.replace("nft_trending_", "")
+        
+        if nft_aggregator:
+            collections = await nft_aggregator.get_trending_collections(chain, limit=10)
+            
+            text = f"🖼️ *TRENDING NFTs ({chain.upper()})* 🖼️\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+            
+            for i, c in enumerate(collections[:10], 1):
+                verified = "✅" if c.verified else ""
+                text += f"{i}. *{c.name}* {verified}\n"
+                text += f"   Floor: {c.floor_price:.4f} {c.currency} | Vol 24h: {c.volume_24h:.2f}\n\n"
+            
+            keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="back_main")]]
+            await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+        else:
+            await query.edit_message_text("❌ NFT aggregator not available.")
+    
+    elif data == "admin_users":
+        if not is_admin_user(query.from_user.username):
+            await query.answer("❌ Admin only!", show_alert=True)
+            return
+        
+        users = await get_telegram_db().users.find({}, {"_id": 0}).to_list(50)
+        text = "👥 *ALL USERS* 👥\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+        for u in users[:20]:
+            badge = "👑" if u.get('is_admin') else "👤"
+            text += f"{badge} @{u.get('username', 'unknown')} | {u.get('credits', 0):.0f} credits\n"
+        text += f"\n*Total:* {len(users)} users"
+        
+        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="admin_back")]]
+        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+    
+    elif data == "admin_trades":
+        if not is_admin_user(query.from_user.username):
+            await query.answer("❌ Admin only!", show_alert=True)
+            return
+        
+        trades = await get_telegram_db().trades.find({}, {"_id": 0}).sort("created_at", -1).to_list(20)
+        text = "📊 *ALL TRADES* 📊\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+        for t in trades[:15]:
+            status = "✅" if t.get('status') == 'COMPLETED' else "❌" if t.get('status') == 'FAILED' else "⏳"
+            text += f"{status} User {t['user_telegram_id']} | {t['trade_type']} {t.get('amount_sol', 0):.3f} SOL | ${t.get('profit_usd', 0):.2f}\n"
+        
+        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="admin_back")]]
+        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+    
+    elif data == "admin_payments":
+        if not is_admin_user(query.from_user.username):
+            await query.answer("❌ Admin only!", show_alert=True)
+            return
+        
+        payments = await get_telegram_db().payments.find({}, {"_id": 0}).sort("created_at", -1).to_list(20)
+        text = "💳 *PAYMENTS* 💳\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+        for p in payments[:15]:
+            status = "✅" if p.get('status') == 'VERIFIED' else "⏳"
+            text += f"{status} User {p['user_telegram_id']} | £{p.get('amount_gbp', 0)} | {p.get('crypto_type', 'N/A')}\n"
+        
+        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="admin_back")]]
+        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+    
+    elif data == "admin_whale_logs":
+        if not is_admin_user(query.from_user.username):
+            await query.answer("❌ Admin only!", show_alert=True)
+            return
+        
+        activities = await get_telegram_db().whale_activities.find({}, {"_id": 0}).sort("detected_at", -1).to_list(20)
+        text = "🐋 *WHALE LOGS* 🐋\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+        for a in activities[:10]:
+            text += f"• {a.get('action', 'N/A')} | {a.get('token_symbol', 'N/A')} | {a.get('detected_at', '')[:16]}\n"
+        
+        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="admin_back")]]
+        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+    
+    elif data == "admin_back":
+        # Go back to admin panel
+        keyboard = [
+            [InlineKeyboardButton("👥 All Users", callback_data="admin_users"),
+             InlineKeyboardButton("📊 All Trades", callback_data="admin_trades")],
+            [InlineKeyboardButton("💳 Payments", callback_data="admin_payments"),
+             InlineKeyboardButton("🐋 Whale Logs", callback_data="admin_whale_logs")],
+        ]
+        await query.edit_message_text(
+            "👑 *ADMIN PANEL* 👑\n\nSelect an option:",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='Markdown'
+        )
+    
     elif data == "back_main":
         keyboard = [
             [InlineKeyboardButton("💳 Create Wallet", callback_data="create_wallet"),
