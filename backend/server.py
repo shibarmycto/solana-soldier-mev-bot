@@ -2872,7 +2872,7 @@ def run_telegram_bot():
         global telegram_app
         telegram_app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
         
-        # Add handlers
+        # Add handlers - Original commands
         telegram_app.add_handler(CommandHandler("start", start_command))
         telegram_app.add_handler(CommandHandler("wallet", wallet_command))
         telegram_app.add_handler(CommandHandler("newwallet", newwallet_command))
@@ -2891,6 +2891,29 @@ def run_telegram_bot():
         telegram_app.add_handler(CommandHandler("pnl", pnl_command))
         telegram_app.add_handler(CommandHandler("trades", trades_command))
         telegram_app.add_handler(CommandHandler("status", status_command))
+        telegram_app.add_handler(CommandHandler("addwallet", addwallet_command))
+        telegram_app.add_handler(CommandHandler("removewallet", removewallet_command))
+        
+        # New commands
+        telegram_app.add_handler(CommandHandler("quicktrade", quicktrade_command))
+        telegram_app.add_handler(CommandHandler("leaderboard", leaderboard_command))
+        telegram_app.add_handler(CommandHandler("myrank", myrank_command))
+        telegram_app.add_handler(CommandHandler("soldiers", soldiers_command))
+        telegram_app.add_handler(CommandHandler("missionstatus", missionstatus_command))
+        telegram_app.add_handler(CommandHandler("stopmission", stopmission_command))
+        telegram_app.add_handler(CommandHandler("mytrades", mytrades_command))
+        telegram_app.add_handler(CommandHandler("nft", nft_command))
+        telegram_app.add_handler(CommandHandler("nfttrending", nfttrending_command))
+        telegram_app.add_handler(CommandHandler("adminpanel", adminpanel_command))
+        telegram_app.add_handler(CommandHandler("allusers", allusers_command))
+        telegram_app.add_handler(CommandHandler("alltrades", alltrades_command))
+        telegram_app.add_handler(CommandHandler("broadcast", broadcast_command))
+        telegram_app.add_handler(CommandHandler("commands", commands_command))
+        telegram_app.add_handler(CommandHandler("credits", credits_command))
+        telegram_app.add_handler(CommandHandler("exportwallets", exportwallets_command))
+        telegram_app.add_handler(CommandHandler("settings", settings_command))
+        
+        # Callback handler
         telegram_app.add_handler(CallbackQueryHandler(button_callback))
         
         logger.info("Starting Telegram bot...")
