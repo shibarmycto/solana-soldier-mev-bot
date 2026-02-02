@@ -150,11 +150,16 @@ Key Components:
 | Admin | /setcredits /allusers /alltrades /adminpanel /broadcast |
 
 ## Testing Status
-- ✅ Backend: 100% pass rate (20+ endpoints tested)
+- ✅ Backend: 100% pass rate (31+ tests passed)
 - ✅ Frontend: 100% pass rate (landing page + dashboard)
-- ✅ Telegram Bot: All 35+ commands registered
+- ✅ Telegram Bot: All 38+ commands registered
 - ✅ Faucet Mining: 48 faucets (SIMULATED claims)
 - ✅ NFT Aggregator: Magic Eden & OpenSea integration
+- ✅ API Management: /apikeys, /setapi, /testapi commands
+
+## API Status
+- ⚠️ **Solscan Pro API**: Key valid but requires PAID TIER upgrade at solscan.io
+- ✅ **Helius RPC**: Working (used as fallback for whale data)
 
 ## MOCKED/SIMULATED Features
 - ⚠️ **Faucet Claims**: Simulated with 70% success rate (not real claims)
