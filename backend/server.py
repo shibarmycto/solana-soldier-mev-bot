@@ -14,7 +14,7 @@ import httpx
 import base58
 from solders.keypair import Keypair
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, ConversationHandler, MessageHandler, filters
 import threading
 import json
 
@@ -39,6 +39,19 @@ from trading_engine import (
     MIN_TRADE_SOL,
     DEFAULT_STOP_LOSS_PCT
 )
+
+# Import new modules
+from faucet_miner import SolanaSoldiersArmy, CRYPTO_FAUCETS
+from nft_aggregator import NFTAggregator
+
+# Conversation states for multi-step interactions
+SELECTING_TRADE_AMOUNT, CONFIRMING_TRADE = range(2)
+
+# Trade amount options (in USD)
+TRADE_AMOUNTS = [2, 5, 10, 25, 50, 100, 250, 500]
+
+# Cost for deploying Solana Soldiers (in credits)
+SOLDIERS_COST = 50
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
