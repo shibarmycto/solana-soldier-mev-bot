@@ -3157,6 +3157,34 @@ async def get_nft_trending(chain: str = "solana"):
         ]}
     return {"collections": []}
 
+@api_router.get("/api-status")
+async def get_api_status():
+    """Get status of all external APIs"""
+    solscan_result = await test_solscan_api()
+    
+    return {
+        "apis": {
+            "solscan": {
+                "status": solscan_result["status"],
+                "status_code": solscan_result["status_code"],
+                "message": solscan_result["message"],
+                "key_configured": bool(api_keys_config.get("solscan"))
+            },
+            "helius": {
+                "status": "ok",
+                "key_configured": bool(api_keys_config.get("helius"))
+            }
+        }
+    }
+
+@api_router.post("/admin/test-api/{service}")
+async def admin_test_api(service: str):
+    """Admin endpoint to test API connections"""
+    if service == "solscan":
+        result = await test_solscan_api()
+        return result
+    return {"status": "error", "message": f"Unknown service: {service}"}
+
 # Include router
 app.include_router(api_router)
 
