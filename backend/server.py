@@ -669,31 +669,59 @@ Auto-Trade on Whale: {auto_status}
 Min Trade: {MIN_TRADE_SOL} SOL
 Default Stop-Loss: {DEFAULT_STOP_LOSS_PCT*100:.0f}%
 
-*User Commands:*
+*💰 WALLET COMMANDS:*
 /start - Start the bot
 /wallet - View your wallets
 /newwallet - Create new wallet
 /balance - Check your balance
-/whales - View tracked whales
-/trending - See trending tokens
-/rugcheck \<token\> - Check token safety
-/trade \<token\> \<amount\> - Execute trade
+/exportwallets - Export wallet keys
 
-*Auto-Trading:*
+*📊 TRADING COMMANDS:*
+/quicktrade - Start trading (choose amount $2-$500)
+/trade \<token\> \<amount\> - Manual trade
 /autotrade \<sol\> \<stoploss%\> - Enable auto-trade
 /stopautotrade - Disable auto-trading
 /stoploss \<percent\> - Set stop-loss %
 /positions - View active positions
+/mytrades - Your trade history
 /pnl - View P&L report
-/trades - Trade history
 
-*Other:*
-/pay - Buy daily access
+*🐋 WHALE TRACKING:*
+/whales - View tracked whales
+/addwallet \<addr\> [label] - Track a wallet
+/removewallet \<addr\> - Stop tracking wallet
+
+*📈 MARKET DATA:*
+/trending - Trending tokens
+/rugcheck \<token\> - Check token safety
+/nft [collection] - NFT data
+/nfttrending - Trending NFTs
+
+*🤖 SOLANA SOLDIERS (50 Credits):*
+/soldiers - Deploy faucet mining agents
+/missionstatus - Check mining progress
+/stopmission - Cancel mining session
+
+*🏆 LEADERBOARD:*
+/leaderboard - Top traders
+/myrank - Your ranking
+
+*💳 PAYMENTS:*
+/pay - Buy daily access (£100)
+/credits - Check credits
+
+*⚙️ OTHER:*
 /status - System status
+/settings - Your settings
 /help - Show this help
+/commands - List all commands
 
-*Admin Commands:*
+*👑 ADMIN COMMANDS:*
 /setcredits @user amount - Set user credits
+/allusers - View all users
+/alltrades - View all trades
+/adminpanel - Admin dashboard
+/broadcast \<msg\> - Send to all users
 
 *Support:* Contact @memecorpofficial
 """
