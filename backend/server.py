@@ -233,23 +233,80 @@ async def get_sol_price():
         logger.error(f"Error fetching SOL price: {e}")
         return 200  # Default fallback price
 
+# Dynamic API keys storage (can be updated by admin)
+api_keys_config = {
+    "solscan": SOLSCAN_API_KEY,
+    "helius": HELIUS_API_KEY
+}
+
 async def get_whale_transactions(wallet_address: str):
-    """Fetch transactions from a whale wallet using Solscan API"""
+    """Fetch transactions from a whale wallet using Solscan API with fallback"""
+    # Try Solscan Pro API first
+    solscan_key = api_keys_config.get("solscan", SOLSCAN_API_KEY)
+    
+    if solscan_key:
+        try:
+            # Correct header format: Authorization: API_KEY
+            headers = {"Authorization": solscan_key}
+            async with httpx.AsyncClient() as http_client:
+                response = await http_client.get(
+                    f"https://pro-api.solscan.io/v2.0/account/transfer",
+                    params={"address": wallet_address, "page_size": 20},
+                    headers=headers,
+                    timeout=15
+                )
+                if response.status_code == 200:
+                    logger.info(f"Solscan API success for {wallet_address[:8]}...")
+                    return response.json()
+                elif response.status_code == 401:
+                    logger.warning(f"Solscan API 401 Unauthorized - check API key")
+                else:
+                    logger.warning(f"Solscan API returned {response.status_code}")
+        except Exception as e:
+            logger.error(f"Solscan API error: {e}")
+    
+    # Fallback to Helius for transaction data
+    helius_key = api_keys_config.get("helius", HELIUS_API_KEY)
+    if helius_key:
+        try:
+            async with httpx.AsyncClient() as http_client:
+                response = await http_client.post(
+                    f"https://api.helius.xyz/v0/addresses/{wallet_address}/transactions",
+                    params={"api-key": helius_key},
+                    json={"limit": 20},
+                    timeout=15
+                )
+                if response.status_code == 200:
+                    logger.info(f"Helius fallback success for {wallet_address[:8]}...")
+                    data = response.json()
+                    # Transform Helius format to match expected structure
+                    return {"data": data, "source": "helius"}
+        except Exception as e:
+            logger.error(f"Helius fallback error: {e}")
+    
+    return {"data": []}
+
+async def test_solscan_api(api_key: str = None) -> dict:
+    """Test if Solscan API key is working"""
+    key = api_key or api_keys_config.get("solscan", SOLSCAN_API_KEY)
+    test_wallet = "74YhGgHA3x1jcL2TchwChDbRVVXvzSxNbYM6ytCukauM"
+    
     try:
-        headers = {"token": SOLSCAN_API_KEY}
+        headers = {"Authorization": key}
         async with httpx.AsyncClient() as http_client:
             response = await http_client.get(
                 f"https://pro-api.solscan.io/v2.0/account/transfer",
-                params={"address": wallet_address, "page_size": 20},
+                params={"address": test_wallet, "page_size": 1},
                 headers=headers,
-                timeout=15
+                timeout=10
             )
-            if response.status_code == 200:
-                return response.json()
-            return {"data": []}
+            return {
+                "status": "ok" if response.status_code == 200 else "error",
+                "status_code": response.status_code,
+                "message": "API key is valid" if response.status_code == 200 else f"API returned {response.status_code}"
+            }
     except Exception as e:
-        logger.error(f"Error fetching whale transactions: {e}")
-        return {"data": []}
+        return {"status": "error", "status_code": 0, "message": str(e)}
 
 async def get_trending_tokens():
     """Fetch trending tokens from pump.fun/dexscreener"""
