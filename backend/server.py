@@ -246,8 +246,8 @@ async def get_whale_transactions(wallet_address: str):
     
     if solscan_key:
         try:
-            # Correct header format: Authorization: API_KEY
-            headers = {"Authorization": solscan_key}
+            # Correct header format: token: API_KEY
+            headers = {"token": solscan_key}
             async with httpx.AsyncClient() as http_client:
                 response = await http_client.get(
                     f"https://pro-api.solscan.io/v2.0/account/transfer",
@@ -259,7 +259,12 @@ async def get_whale_transactions(wallet_address: str):
                     logger.info(f"Solscan API success for {wallet_address[:8]}...")
                     return response.json()
                 elif response.status_code == 401:
-                    logger.warning(f"Solscan API 401 Unauthorized - check API key")
+                    error_data = response.json()
+                    error_msg = error_data.get("error_message", "Unauthorized")
+                    if "upgrade" in error_msg.lower():
+                        logger.warning(f"Solscan API requires paid tier - using Helius fallback")
+                    else:
+                        logger.warning(f"Solscan API 401: {error_msg}")
                 else:
                     logger.warning(f"Solscan API returned {response.status_code}")
         except Exception as e:
@@ -270,10 +275,9 @@ async def get_whale_transactions(wallet_address: str):
     if helius_key:
         try:
             async with httpx.AsyncClient() as http_client:
-                response = await http_client.post(
+                response = await http_client.get(
                     f"https://api.helius.xyz/v0/addresses/{wallet_address}/transactions",
-                    params={"api-key": helius_key},
-                    json={"limit": 20},
+                    params={"api-key": helius_key, "limit": 20},
                     timeout=15
                 )
                 if response.status_code == 200:
@@ -292,7 +296,8 @@ async def test_solscan_api(api_key: str = None) -> dict:
     test_wallet = "74YhGgHA3x1jcL2TchwChDbRVVXvzSxNbYM6ytCukauM"
     
     try:
-        headers = {"Authorization": key}
+        # Correct header: token
+        headers = {"token": key}
         async with httpx.AsyncClient() as http_client:
             response = await http_client.get(
                 f"https://pro-api.solscan.io/v2.0/account/transfer",
@@ -300,10 +305,30 @@ async def test_solscan_api(api_key: str = None) -> dict:
                 headers=headers,
                 timeout=10
             )
+            if response.status_code == 200:
+                return {
+                    "status": "ok",
+                    "status_code": response.status_code,
+                    "message": "API key is valid and working"
+                }
+            elif response.status_code == 401:
+                error_data = response.json()
+                error_msg = error_data.get("error_message", "Unauthorized")
+                if "upgrade" in error_msg.lower():
+                    return {
+                        "status": "upgrade_required",
+                        "status_code": response.status_code,
+                        "message": "API key valid but requires paid tier upgrade at solscan.io"
+                    }
+                return {
+                    "status": "error",
+                    "status_code": response.status_code,
+                    "message": error_msg
+                }
             return {
-                "status": "ok" if response.status_code == 200 else "error",
+                "status": "error",
                 "status_code": response.status_code,
-                "message": "API key is valid" if response.status_code == 200 else f"API returned {response.status_code}"
+                "message": f"API returned {response.status_code}"
             }
     except Exception as e:
         return {"status": "error", "status_code": 0, "message": str(e)}
