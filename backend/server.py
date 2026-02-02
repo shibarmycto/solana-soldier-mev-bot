@@ -1899,8 +1899,148 @@ async def commands_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 *👑 ADMIN:*
 /setcredits /allusers /alltrades
 /adminpanel /broadcast
+/apikeys /setapi /testapi
 """
     await update.message.reply_text(commands_text, parse_mode='Markdown')
+
+async def apikeys_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /apikeys - Admin view API key status"""
+    username = update.effective_user.username
+    
+    if not is_admin_user(username):
+        await update.message.reply_text("❌ Admin access required.")
+        return
+    
+    # Test each API
+    solscan_status = await test_solscan_api()
+    
+    solscan_key = api_keys_config.get("solscan", "")
+    helius_key = api_keys_config.get("helius", "")
+    
+    solscan_masked = f"{solscan_key[:20]}...{solscan_key[-10:]}" if len(solscan_key) > 30 else solscan_key[:10] + "..."
+    helius_masked = f"{helius_key[:8]}...{helius_key[-4:]}" if len(helius_key) > 12 else helius_key[:6] + "..."
+    
+    status_icon = "✅" if solscan_status["status"] == "ok" else "❌"
+    
+    await update.message.reply_text(
+        f"""
+🔑 *API KEYS STATUS* 🔑
+━━━━━━━━━━━━━━━━━━━━━
+
+*Solscan Pro API:*
+Key: `{solscan_masked}`
+Status: {status_icon} {solscan_status['message']}
+
+*Helius RPC:*
+Key: `{helius_masked}`
+Status: ✅ Connected
+
+*Commands:*
+• `/setapi solscan <key>` - Update Solscan API
+• `/setapi helius <key>` - Update Helius API
+• `/testapi solscan` - Test Solscan connection
+""",
+        parse_mode='Markdown'
+    )
+
+async def setapi_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /setapi - Admin set API keys"""
+    username = update.effective_user.username
+    
+    if not is_admin_user(username):
+        await update.message.reply_text("❌ Admin access required.")
+        return
+    
+    args = context.args
+    if len(args) < 2:
+        await update.message.reply_text(
+            """
+*Usage:* `/setapi <service> <api_key>`
+
+*Services:*
+• `solscan` - Solscan Pro API
+• `helius` - Helius RPC API
+
+*Example:*
+`/setapi solscan eyJhbGciOiJIUzI1NiIs...`
+""",
+            parse_mode='Markdown'
+        )
+        return
+    
+    service = args[0].lower()
+    new_key = args[1]
+    
+    if service not in ["solscan", "helius"]:
+        await update.message.reply_text("❌ Invalid service. Use `solscan` or `helius`.")
+        return
+    
+    # Test the new key before saving
+    if service == "solscan":
+        test_result = await test_solscan_api(new_key)
+        if test_result["status"] != "ok":
+            await update.message.reply_text(
+                f"❌ *API Key Test Failed*\n\nStatus: {test_result['status_code']}\nMessage: {test_result['message']}\n\nKey was NOT updated.",
+                parse_mode='Markdown'
+            )
+            return
+    
+    # Update the key
+    old_key = api_keys_config.get(service, "")
+    api_keys_config[service] = new_key
+    
+    # Also update in database for persistence
+    await get_telegram_db().config.update_one(
+        {"key": f"api_key_{service}"},
+        {"$set": {"value": new_key, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    
+    await update.message.reply_text(
+        f"""
+✅ *API Key Updated!*
+
+*Service:* {service.upper()}
+*Old Key:* `{old_key[:15]}...` (masked)
+*New Key:* `{new_key[:15]}...` (masked)
+
+The new key is now active.
+""",
+        parse_mode='Markdown'
+    )
+    
+    logger.info(f"Admin {username} updated {service} API key")
+
+async def testapi_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /testapi - Test API connection"""
+    username = update.effective_user.username
+    
+    if not is_admin_user(username):
+        await update.message.reply_text("❌ Admin access required.")
+        return
+    
+    args = context.args
+    service = args[0].lower() if args else "solscan"
+    
+    await update.message.reply_text(f"🔄 Testing {service.upper()} API...")
+    
+    if service == "solscan":
+        result = await test_solscan_api()
+        status_icon = "✅" if result["status"] == "ok" else "❌"
+        
+        await update.message.reply_text(
+            f"""
+{status_icon} *Solscan API Test*
+
+*Status Code:* {result['status_code']}
+*Result:* {result['message']}
+
+{'API is working correctly!' if result['status'] == 'ok' else 'API test failed. Check your key with /setapi'}
+""",
+            parse_mode='Markdown'
+        )
+    else:
+        await update.message.reply_text("Currently only `solscan` test is supported.")
 
 async def credits_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /credits - Check credits balance"""
