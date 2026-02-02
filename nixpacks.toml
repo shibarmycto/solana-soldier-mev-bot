@@ -1,3 +1,4 @@
+# Configuration for Solana Soldier MEV Bot - Updated to trigger fresh build
 [phases.setup]
 nixPkgs = ["python311", "gcc"]
 
