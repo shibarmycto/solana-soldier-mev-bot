@@ -1945,7 +1945,15 @@ async def apikeys_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     solscan_masked = f"{solscan_key[:20]}...{solscan_key[-10:]}" if len(solscan_key) > 30 else solscan_key[:10] + "..."
     helius_masked = f"{helius_key[:8]}...{helius_key[-4:]}" if len(helius_key) > 12 else helius_key[:6] + "..."
     
-    status_icon = "✅" if solscan_status["status"] == "ok" else "❌"
+    if solscan_status["status"] == "ok":
+        status_icon = "✅"
+        status_msg = "Working"
+    elif solscan_status["status"] == "upgrade_required":
+        status_icon = "⚠️"
+        status_msg = "Needs paid tier"
+    else:
+        status_icon = "❌"
+        status_msg = solscan_status['message']
     
     await update.message.reply_text(
         f"""
@@ -1954,11 +1962,15 @@ async def apikeys_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 *Solscan Pro API:*
 Key: `{solscan_masked}`
-Status: {status_icon} {solscan_status['message']}
+Status: {status_icon} {status_msg}
+{'💡 _Upgrade at https://solscan.io/account/pro_' if solscan_status['status'] == 'upgrade_required' else ''}
 
 *Helius RPC:*
 Key: `{helius_masked}`
-Status: ✅ Connected
+Status: ✅ Connected (used for fallback)
+
+*Fallback Status:*
+If Solscan fails, Helius is used for whale data ✅
 
 *Commands:*
 • `/setapi solscan <key>` - Update Solscan API
