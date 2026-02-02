@@ -105,8 +105,15 @@ trending_scanner: Optional[TrendingTokenScanner] = None
 helius_rpc: Optional[HeliusRPC] = None
 whale_monitor_task: Optional[asyncio.Task] = None
 
+# New systems
+soldiers_army: Optional[SolanaSoldiersArmy] = None
+nft_aggregator: Optional[NFTAggregator] = None
+
 # Store active trading users (telegram_id -> keypair)
 active_trading_users: Dict[int, Dict] = {}
+
+# Store user trade settings (telegram_id -> {profit_target, trade_amount_usd, stop_loss_pct})
+user_trade_settings: Dict[int, Dict] = {}
 
 # Pydantic Models
 class UserModel(BaseModel):
