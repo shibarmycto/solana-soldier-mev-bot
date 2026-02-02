@@ -1291,7 +1291,633 @@ async def whale_activity_callback(activity: Dict):
             except Exception as e:
                 logger.error(f"Auto-trade error for user {telegram_id}: {e}")
 
-async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# ============== NEW COMMANDS ==============
+
+async def quicktrade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /quicktrade - Start trading with selectable amount ($2-$500)"""
+    telegram_id = update.effective_user.id
+    
+    # Check user credits
+    user = await get_telegram_db().users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    if not user or user.get('credits', 0) <= 0:
+        await update.message.reply_text("❌ You need credits to trade. Use /pay to buy access.")
+        return
+    
+    # Check wallet
+    wallet = await get_telegram_db().wallets.find_one(
+        {"user_telegram_id": telegram_id, "is_active": True},
+        {"_id": 0}
+    )
+    if not wallet:
+        await update.message.reply_text("❌ No wallet found. Use /newwallet to create one first.")
+        return
+    
+    # Get wallet balance
+    balance_sol = 0
+    if helius_rpc:
+        balance_sol = await helius_rpc.get_balance(wallet['public_key'])
+    
+    sol_price = await get_sol_price()
+    balance_usd = balance_sol * sol_price
+    
+    # Create trade amount selection buttons
+    keyboard = []
+    row = []
+    for i, amount in enumerate(TRADE_AMOUNTS):
+        if balance_usd >= amount:
+            row.append(InlineKeyboardButton(f"${amount}", callback_data=f"trade_amount_{amount}"))
+        else:
+            row.append(InlineKeyboardButton(f"${amount} ❌", callback_data=f"trade_amount_insufficient_{amount}"))
+        if len(row) == 4:
+            keyboard.append(row)
+            row = []
+    if row:
+        keyboard.append(row)
+    
+    keyboard.append([InlineKeyboardButton("❌ Cancel", callback_data="back_main")])
+    
+    await update.message.reply_text(
+        f"""
+⚡ *QUICK TRADE* ⚡
+━━━━━━━━━━━━━━━━━━━━━
+
+*Your Balance:*
+• {balance_sol:.4f} SOL (~${balance_usd:.2f})
+
+*Select Trade Amount:*
+Choose how much USD value to trade per signal.
+
+Higher amounts = Higher potential profit (and risk)!
+
+*Current Settings:*
+• Stop-Loss: {DEFAULT_STOP_LOSS_PCT*100:.0f}%
+• Max Trade Time: {MAX_TRADE_TIME_SECONDS}s
+
+Select your trade amount below:
+""",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='Markdown'
+    )
+
+async def leaderboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /leaderboard - Show top traders by profit"""
+    tg_db = get_telegram_db()
+    
+    # Aggregate trades by user to get total profit
+    pipeline = [
+        {"$group": {
+            "_id": "$user_telegram_id",
+            "total_profit": {"$sum": "$profit_usd"},
+            "total_trades": {"$sum": 1},
+            "successful_trades": {
+                "$sum": {"$cond": [{"$eq": ["$status", "COMPLETED"]}, 1, 0]}
+            }
+        }},
+        {"$sort": {"total_profit": -1}},
+        {"$limit": 10}
+    ]
+    
+    leaderboard_data = await tg_db.trades.aggregate(pipeline).to_list(10)
+    
+    # Get usernames
+    leaderboard_text = "🏆 *PROFIT LEADERBOARD* 🏆\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+    
+    medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    
+    for i, entry in enumerate(leaderboard_data):
+        user = await tg_db.users.find_one({"telegram_id": entry["_id"]}, {"_id": 0, "username": 1})
+        username = user.get("username", "Anonymous") if user else "Anonymous"
+        
+        win_rate = (entry["successful_trades"] / entry["total_trades"] * 100) if entry["total_trades"] > 0 else 0
+        profit = entry["total_profit"]
+        
+        medal = medals[i] if i < len(medals) else f"{i+1}."
+        profit_sign = "+" if profit >= 0 else ""
+        
+        leaderboard_text += f"{medal} *@{username}*\n"
+        leaderboard_text += f"    💰 {profit_sign}${profit:.2f} | 📊 {entry['total_trades']} trades | ✅ {win_rate:.0f}%\n\n"
+    
+    if not leaderboard_data:
+        leaderboard_text += "_No trades yet. Be the first to trade!_"
+    
+    await update.message.reply_text(leaderboard_text, parse_mode='Markdown')
+
+async def myrank_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /myrank - Show user's ranking"""
+    telegram_id = update.effective_user.id
+    tg_db = get_telegram_db()
+    
+    # Get user's stats
+    user_trades = await tg_db.trades.find(
+        {"user_telegram_id": telegram_id},
+        {"_id": 0, "profit_usd": 1, "status": 1}
+    ).to_list(10000)
+    
+    total_profit = sum(t.get('profit_usd', 0) for t in user_trades)
+    total_trades = len(user_trades)
+    successful = sum(1 for t in user_trades if t.get('status') == 'COMPLETED')
+    win_rate = (successful / total_trades * 100) if total_trades > 0 else 0
+    
+    # Calculate rank
+    pipeline = [
+        {"$group": {
+            "_id": "$user_telegram_id",
+            "total_profit": {"$sum": "$profit_usd"}
+        }},
+        {"$sort": {"total_profit": -1}}
+    ]
+    
+    all_traders = await tg_db.trades.aggregate(pipeline).to_list(1000)
+    rank = 1
+    for trader in all_traders:
+        if trader["_id"] == telegram_id:
+            break
+        rank += 1
+    
+    total_traders = len(all_traders)
+    
+    rank_text = f"""
+🎖️ *YOUR TRADING RANK* 🎖️
+━━━━━━━━━━━━━━━━━━━━━
+
+*Rank:* #{rank} of {total_traders} traders
+
+*Your Stats:*
+• Total Profit: ${total_profit:.2f}
+• Total Trades: {total_trades}
+• Successful: {successful}
+• Win Rate: {win_rate:.1f}%
+
+{'🏆 *TOP 10 TRADER!*' if rank <= 10 else '📈 Keep trading to climb the ranks!'}
+"""
+    
+    await update.message.reply_text(rank_text, parse_mode='Markdown')
+
+async def soldiers_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /soldiers - Deploy Solana Soldiers faucet mining agents"""
+    telegram_id = update.effective_user.id
+    
+    # Check credits
+    user = await get_telegram_db().users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    credits = user.get('credits', 0) if user else 0
+    
+    if credits < SOLDIERS_COST:
+        await update.message.reply_text(
+            f"""
+🤖 *SOLANA SOLDIERS* 🤖
+━━━━━━━━━━━━━━━━━━━━━
+
+Deploy AI agents to mine crypto from 50+ faucets automatically for 24 hours!
+
+*Cost:* {SOLDIERS_COST} credits
+*Your Credits:* {credits:.0f}
+
+❌ *Insufficient Credits*
+
+Use /pay to buy more credits.
+""",
+            parse_mode='Markdown'
+        )
+        return
+    
+    # Show deployment options
+    keyboard = [
+        [InlineKeyboardButton("🚀 Deploy 5 Soldiers (50 credits)", callback_data="deploy_soldiers_5")],
+        [InlineKeyboardButton("💪 Deploy 10 Soldiers (50 credits)", callback_data="deploy_soldiers_10")],
+        [InlineKeyboardButton("⚔️ Deploy 20 Soldiers (50 credits)", callback_data="deploy_soldiers_20")],
+        [InlineKeyboardButton("❌ Cancel", callback_data="back_main")]
+    ]
+    
+    faucet_stats = soldiers_army.get_faucet_stats() if soldiers_army else {"total_faucets": 50, "mainnet_faucets": 10, "testnet_faucets": 40}
+    
+    await update.message.reply_text(
+        f"""
+🤖 *SOLANA SOLDIERS - FAUCET MINERS* 🤖
+━━━━━━━━━━━━━━━━━━━━━
+
+Deploy AI agents to automatically claim crypto from faucets!
+
+*Available Faucets:* {faucet_stats['total_faucets']}
+• Mainnet: {faucet_stats['mainnet_faucets']} faucets
+• Testnet: {faucet_stats['testnet_faucets']} faucets
+
+*Supported Chains:*
+SOL, ETH, MATIC, BNB, AVAX, FTM, DOGE, LTC, and more!
+
+*Features:*
+• 🔄 Auto proxy rotation
+• 🤖 Multi-agent deployment
+• 📊 Hourly progress reports
+• 🔑 Wallet creation for each chain
+• ⏰ 24-hour mining session
+
+*Cost:* {SOLDIERS_COST} credits (24h)
+*Your Credits:* {credits:.0f} ✅
+
+Select deployment option:
+""",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='Markdown'
+    )
+
+async def missionstatus_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /missionstatus - Check mining progress"""
+    telegram_id = update.effective_user.id
+    
+    if not soldiers_army:
+        await update.message.reply_text("❌ Soldiers system not initialized.")
+        return
+    
+    session = await soldiers_army.get_session_status(telegram_id)
+    
+    if not session or session.status != "active":
+        await update.message.reply_text(
+            """
+📊 *MISSION STATUS* 📊
+
+No active mining session.
+
+Use /soldiers to deploy agents!
+""",
+            parse_mode='Markdown'
+        )
+        return
+    
+    earnings_text = "\n".join([
+        f"  • {amt:.6f} {curr}" 
+        for curr, amt in session.total_earned.items()
+    ]) or "  _Mining in progress..._"
+    
+    success_rate = (session.faucets_successful / session.faucets_attempted * 100) if session.faucets_attempted > 0 else 0
+    
+    await update.message.reply_text(
+        f"""
+📊 *MISSION STATUS* 📊
+━━━━━━━━━━━━━━━━━━━━━
+
+*Session:* `{session.session_id[:15]}...`
+*Status:* 🟢 Active
+*Expires:* {session.expires_at[:16]}
+
+*Agents:* {session.agents_deployed} deployed
+
+*Progress:*
+• Faucets Attempted: {session.faucets_attempted}
+• Successful Claims: {session.faucets_successful}
+• Success Rate: {success_rate:.1f}%
+
+*Earnings So Far:*
+{earnings_text}
+
+Use /stopmission to cancel.
+""",
+        parse_mode='Markdown'
+    )
+
+async def stopmission_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /stopmission - Cancel mining session"""
+    telegram_id = update.effective_user.id
+    
+    if not soldiers_army:
+        await update.message.reply_text("❌ Soldiers system not initialized.")
+        return
+    
+    success = await soldiers_army.cancel_session(telegram_id)
+    
+    if success:
+        await update.message.reply_text("✅ Mission cancelled. Final report will be sent shortly.")
+    else:
+        await update.message.reply_text("❌ No active mission to cancel.")
+
+async def mytrades_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /mytrades - Show user's trade history with details"""
+    telegram_id = update.effective_user.id
+    
+    trades = await get_telegram_db().trades.find(
+        {"user_telegram_id": telegram_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(20)
+    
+    if not trades:
+        await update.message.reply_text("📊 No trades yet. Start trading to see history!")
+        return
+    
+    text = "📊 *YOUR TRADE HISTORY* 📊\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+    
+    total_profit = 0
+    for t in trades[:10]:
+        status_icon = "✅" if t.get('status') == 'COMPLETED' else "❌" if t.get('status') == 'FAILED' else "⏳"
+        profit = t.get('profit_usd', 0)
+        total_profit += profit
+        profit_text = f"+${profit:.2f}" if profit >= 0 else f"-${abs(profit):.2f}"
+        
+        token = t.get('token_symbol', t.get('token_address', 'UNKNOWN')[:8])
+        
+        text += f"{status_icon} *{t['trade_type']}* {t.get('amount_sol', 0):.4f} SOL\n"
+        text += f"   Token: {token} | P&L: {profit_text}\n"
+        text += f"   _{t['created_at'][:16]}_\n\n"
+    
+    text += f"━━━━━━━━━━━━━━━━━━━━━\n"
+    text += f"*Total P&L:* ${total_profit:.2f}\n"
+    text += f"*Total Trades:* {len(trades)}"
+    
+    await update.message.reply_text(text, parse_mode='Markdown')
+
+async def nft_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /nft - NFT collection info"""
+    args = context.args
+    
+    if not nft_aggregator:
+        await update.message.reply_text("❌ NFT aggregator not initialized.")
+        return
+    
+    if not args:
+        # Show trending NFTs
+        collections = await nft_aggregator.get_trending_collections("solana", limit=10)
+        
+        text = "🖼️ *TRENDING NFTs (Solana)* 🖼️\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+        
+        for i, c in enumerate(collections[:10], 1):
+            verified = "✅" if c.verified else ""
+            text += f"{i}. *{c.name}* {verified}\n"
+            text += f"   Floor: {c.floor_price:.2f} {c.currency} | Vol: {c.volume_24h:.0f}\n\n"
+        
+        text += "\nUse `/nft <collection>` for details"
+        
+        await update.message.reply_text(text, parse_mode='Markdown')
+    else:
+        # Search for specific collection
+        query = " ".join(args)
+        collections = await nft_aggregator.search_collections(query, "solana")
+        
+        if collections:
+            c = collections[0]
+            text = nft_aggregator.format_collection_summary(c)
+            await update.message.reply_text(text, parse_mode='Markdown')
+        else:
+            await update.message.reply_text(f"❌ Collection '{query}' not found.")
+
+async def nfttrending_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /nfttrending - Show trending NFT collections"""
+    if not nft_aggregator:
+        await update.message.reply_text("❌ NFT aggregator not initialized.")
+        return
+    
+    keyboard = [
+        [InlineKeyboardButton("🟣 Solana", callback_data="nft_trending_solana"),
+         InlineKeyboardButton("🔵 Ethereum", callback_data="nft_trending_ethereum")]
+    ]
+    
+    await update.message.reply_text(
+        "🖼️ *NFT TRENDING* 🖼️\n\nSelect blockchain:",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='Markdown'
+    )
+
+async def adminpanel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /adminpanel - Admin dashboard"""
+    username = update.effective_user.username
+    
+    if not is_admin_user(username):
+        await update.message.reply_text("❌ Admin access required.")
+        return
+    
+    tg_db = get_telegram_db()
+    
+    # Gather stats
+    total_users = await tg_db.users.count_documents({})
+    total_wallets = await tg_db.wallets.count_documents({"is_active": True})
+    total_trades = await tg_db.trades.count_documents({})
+    pending_payments = await tg_db.payments.count_documents({"status": "PENDING_VERIFICATION"})
+    
+    trades = await tg_db.trades.find({}, {"_id": 0, "profit_usd": 1}).to_list(10000)
+    total_profit = sum(t.get('profit_usd', 0) for t in trades)
+    
+    # Recent activity
+    recent_trades = await tg_db.trades.find({}, {"_id": 0}).sort("created_at", -1).to_list(5)
+    
+    keyboard = [
+        [InlineKeyboardButton("👥 All Users", callback_data="admin_users"),
+         InlineKeyboardButton("📊 All Trades", callback_data="admin_trades")],
+        [InlineKeyboardButton("💳 Payments", callback_data="admin_payments"),
+         InlineKeyboardButton("🐋 Whale Logs", callback_data="admin_whale_logs")],
+        [InlineKeyboardButton("📢 Broadcast", callback_data="admin_broadcast"),
+         InlineKeyboardButton("⚙️ Settings", callback_data="admin_settings")]
+    ]
+    
+    await update.message.reply_text(
+        f"""
+👑 *ADMIN PANEL* 👑
+━━━━━━━━━━━━━━━━━━━━━
+
+*System Overview:*
+• Users: {total_users}
+• Active Wallets: {total_wallets}
+• Total Trades: {total_trades}
+• Total Profit: ${total_profit:.2f}
+• Pending Payments: {pending_payments}
+
+*Trading Status:*
+• Live Trading: {'🟢 ON' if LIVE_TRADING_ENABLED else '🔴 OFF'}
+• Auto-Trade: {'🟢 ON' if AUTO_TRADE_ON_WHALE_SIGNAL else '🔴 OFF'}
+• Active Traders: {len(active_trading_users)}
+
+*Recent Activity:*
+{chr(10).join([f"• {t['trade_type']} {t.get('amount_sol', 0):.3f} SOL - {t['status']}" for t in recent_trades[:3]]) or 'No recent trades'}
+
+Select an option:
+""",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='Markdown'
+    )
+
+async def allusers_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /allusers - Admin view all users"""
+    username = update.effective_user.username
+    
+    if not is_admin_user(username):
+        await update.message.reply_text("❌ Admin access required.")
+        return
+    
+    users = await get_telegram_db().users.find({}, {"_id": 0}).to_list(100)
+    
+    text = "👥 *ALL USERS* 👥\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+    
+    for u in users[:20]:
+        badge = "👑" if u.get('is_admin') else "👤"
+        credits = u.get('credits', 0)
+        username_str = u.get('username', 'unknown')
+        text += f"{badge} @{username_str} | {credits:.0f} credits | ID: {u.get('telegram_id')}\n"
+    
+    text += f"\n*Total:* {len(users)} users"
+    
+    await update.message.reply_text(text, parse_mode='Markdown')
+
+async def alltrades_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /alltrades - Admin view all trades"""
+    username = update.effective_user.username
+    
+    if not is_admin_user(username):
+        await update.message.reply_text("❌ Admin access required.")
+        return
+    
+    trades = await get_telegram_db().trades.find({}, {"_id": 0}).sort("created_at", -1).to_list(50)
+    
+    text = "📊 *ALL TRADES* 📊\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+    
+    for t in trades[:15]:
+        status_icon = "✅" if t.get('status') == 'COMPLETED' else "❌" if t.get('status') == 'FAILED' else "⏳"
+        profit = t.get('profit_usd', 0)
+        text += f"{status_icon} User {t['user_telegram_id']} | {t['trade_type']} {t.get('amount_sol', 0):.3f} SOL | P&L: ${profit:.2f}\n"
+    
+    total_profit = sum(t.get('profit_usd', 0) for t in trades)
+    text += f"\n━━━━━━━━━━━━━━━━━━━━━\n*Total Trades:* {len(trades)}\n*Total P&L:* ${total_profit:.2f}"
+    
+    await update.message.reply_text(text, parse_mode='Markdown')
+
+async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /broadcast - Admin send message to all users"""
+    username = update.effective_user.username
+    
+    if not is_admin_user(username):
+        await update.message.reply_text("❌ Admin access required.")
+        return
+    
+    if not context.args:
+        await update.message.reply_text("Usage: /broadcast <message>")
+        return
+    
+    message = " ".join(context.args)
+    users = await get_telegram_db().users.find({}, {"_id": 0, "telegram_id": 1}).to_list(10000)
+    
+    sent = 0
+    failed = 0
+    bot = Bot(token=TELEGRAM_BOT_TOKEN)
+    
+    for user in users:
+        try:
+            await bot.send_message(
+                chat_id=user['telegram_id'],
+                text=f"📢 *ANNOUNCEMENT*\n\n{message}\n\n_- Solana Soldier Team_",
+                parse_mode='Markdown'
+            )
+            sent += 1
+        except:
+            failed += 1
+        await asyncio.sleep(0.1)  # Rate limiting
+    
+    await update.message.reply_text(f"✅ Broadcast sent to {sent} users. Failed: {failed}")
+
+async def commands_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /commands - List all available commands"""
+    commands_text = """
+📋 *ALL COMMANDS* 📋
+━━━━━━━━━━━━━━━━━━━━━
+
+*💰 WALLET:*
+/start /wallet /newwallet /balance /exportwallets
+
+*📊 TRADING:*
+/quicktrade /trade /autotrade /stopautotrade
+/stoploss /positions /mytrades /pnl
+
+*🐋 WHALES:*
+/whales /addwallet /removewallet
+
+*📈 MARKET:*
+/trending /rugcheck /nft /nfttrending
+
+*🤖 SOLDIERS:*
+/soldiers /missionstatus /stopmission
+
+*🏆 LEADERBOARD:*
+/leaderboard /myrank
+
+*💳 PAYMENTS:*
+/pay /credits
+
+*⚙️ OTHER:*
+/status /settings /help /commands
+
+*👑 ADMIN:*
+/setcredits /allusers /alltrades
+/adminpanel /broadcast
+"""
+    await update.message.reply_text(commands_text, parse_mode='Markdown')
+
+async def credits_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /credits - Check credits balance"""
+    telegram_id = update.effective_user.id
+    
+    user = await get_telegram_db().users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    credits = user.get('credits', 0) if user else 0
+    
+    await update.message.reply_text(
+        f"""
+💳 *YOUR CREDITS* 💳
+
+*Balance:* {credits:.0f} credits
+
+*Credit Usage:*
+• Trading: 1 credit per trade
+• Soldiers (24h): {SOLDIERS_COST} credits
+
+Use /pay to buy more credits (£100 = 10,000 credits)
+""",
+        parse_mode='Markdown'
+    )
+
+async def exportwallets_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /exportwallets - Export all wallet private keys"""
+    telegram_id = update.effective_user.id
+    
+    wallets = await get_telegram_db().wallets.find(
+        {"user_telegram_id": telegram_id},
+        {"_id": 0}
+    ).to_list(100)
+    
+    if not wallets:
+        await update.message.reply_text("❌ No wallets found.")
+        return
+    
+    text = "🔐 *YOUR WALLETS* 🔐\n━━━━━━━━━━━━━━━━━━━━━\n\n"
+    text += "⚠️ *SAVE SECURELY - DELETE THIS MESSAGE AFTER*\n\n"
+    
+    for i, w in enumerate(wallets, 1):
+        status = "🟢 Active" if w.get('is_active') else "🔴 Inactive"
+        text += f"*Wallet {i}:* {status}\n"
+        text += f"Public: `{w['public_key']}`\n"
+        text += f"Private: `{w['private_key_encrypted']}`\n\n"
+    
+    await update.message.reply_text(text, parse_mode='Markdown')
+
+async def settings_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /settings - User settings"""
+    telegram_id = update.effective_user.id
+    
+    user_settings = user_trade_settings.get(telegram_id, {
+        'profit_target': MIN_PROFIT_USD,
+        'stop_loss_pct': DEFAULT_STOP_LOSS_PCT * 100,
+        'trade_amount_usd': 2
+    })
+    
+    keyboard = [
+        [InlineKeyboardButton(f"💰 Trade Amount: ${user_settings.get('trade_amount_usd', 2)}", callback_data="settings_trade_amount")],
+        [InlineKeyboardButton(f"🎯 Profit Target: ${user_settings.get('profit_target', MIN_PROFIT_USD)}", callback_data="settings_profit_target")],
+        [InlineKeyboardButton(f"🛡️ Stop-Loss: {user_settings.get('stop_loss_pct', DEFAULT_STOP_LOSS_PCT*100):.0f}%", callback_data="settings_stop_loss")],
+        [InlineKeyboardButton("🔙 Back", callback_data="back_main")]
+    ]
+    
+    await update.message.reply_text(
+        """
+⚙️ *YOUR SETTINGS* ⚙️
+━━━━━━━━━━━━━━━━━━━━━
+
+Configure your trading parameters:
+""",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='Markdown'
+    )
     """Handle button callbacks"""
     query = update.callback_query
     await query.answer()
