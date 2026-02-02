@@ -1918,6 +1918,8 @@ Configure your trading parameters:
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode='Markdown'
     )
+
+async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle button callbacks"""
     query = update.callback_query
     await query.answer()
