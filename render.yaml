@@ -1,0 +1,48 @@
+services:
+  # Backend API Service
+  - type: web
+    name: solana-soldier-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DB_NAME
+        value: solana_soldier
+      - key: LIVE_TRADING_ENABLED
+        value: "true"
+      - key: AUTO_TRADE_ON_WHALE_SIGNAL
+        value: "true"
+      - key: CORS_ORIGINS
+        value: "*"
+      # Add these in Render Dashboard (sensitive):
+      # - MONGO_URL
+      # - TELEGRAM_BOT_TOKEN
+      # - HELIUS_API_KEY
+      # - SOLSCAN_API_KEY
+      # - ADMIN_CHAT_ID
+      # - ADMIN_USERNAME
+      # - PAYMENT_SOL_ADDRESS
+      # - PAYMENT_ETH_ADDRESS
+      # - PAYMENT_BTC_ADDRESS
+
+  # Frontend Static Site
+  - type: web
+    name: solana-soldier-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: yarn install && yarn build
+    staticPublishPath: build
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    envVars:
+      - key: REACT_APP_BACKEND_URL
+        fromService:
+          type: web
+          name: solana-soldier-api
+          property: host
