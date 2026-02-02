@@ -122,10 +122,43 @@ Key Components:
 - ✅ **Privacy Features** - Preset whale wallets hidden from regular users
 - ✅ **Free Admin Access** - Admins automatically get unlimited credits
 
+### Phase 5 - Major Features Update (2026-02-02)
+- ✅ **Profit Leaderboard** - /leaderboard, /myrank commands
+- ✅ **Admin Panel** - /adminpanel, /allusers, /alltrades, /broadcast commands
+- ✅ **Quick Trade ($2-$500)** - /quicktrade with button selection for trade amounts
+- ✅ **Solana Soldiers AI Faucet Mining** (50 credits):
+  - 48 crypto faucets across 20+ chains
+  - Auto proxy rotation
+  - Multi-agent deployment (5/10/20 agents)
+  - 24-hour mining sessions
+  - Progress reports every 6 hours
+- ✅ **NFT Aggregator** - /nft, /nfttrending (Magic Eden, OpenSea)
+- ✅ **Real-time Trade Reports** - Auto notifications on trades
+- ✅ **Full Command List** - 35+ Telegram commands
+
+## Full Command List
+| Category | Commands |
+|----------|----------|
+| Wallet | /start /wallet /newwallet /balance /exportwallets |
+| Trading | /quicktrade /trade /autotrade /stopautotrade /stoploss /positions /mytrades /pnl |
+| Whales | /whales /addwallet /removewallet |
+| Market | /trending /rugcheck /nft /nfttrending |
+| Soldiers | /soldiers /missionstatus /stopmission |
+| Leaderboard | /leaderboard /myrank |
+| Payments | /pay /credits |
+| Other | /status /settings /help /commands |
+| Admin | /setcredits /allusers /alltrades /adminpanel /broadcast |
+
 ## Testing Status
-- ✅ Backend: 100% pass rate (13+ endpoints tested)
+- ✅ Backend: 100% pass rate (20+ endpoints tested)
 - ✅ Frontend: 100% pass rate (landing page + dashboard)
-- ✅ Telegram Bot: Responding to API calls
+- ✅ Telegram Bot: All 35+ commands registered
+- ✅ Faucet Mining: 48 faucets (SIMULATED claims)
+- ✅ NFT Aggregator: Magic Eden & OpenSea integration
+
+## MOCKED/SIMULATED Features
+- ⚠️ **Faucet Claims**: Simulated with 70% success rate (not real claims)
+- Real faucets require captcha solving and can ban IPs
 
 ## Next Steps (P1)
 - [ ] Fix Solscan API 401 error (whale data)
