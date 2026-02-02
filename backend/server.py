@@ -3217,6 +3217,11 @@ def run_telegram_bot():
         telegram_app.add_handler(CommandHandler("exportwallets", exportwallets_command))
         telegram_app.add_handler(CommandHandler("settings", settings_command))
         
+        # API management commands (admin)
+        telegram_app.add_handler(CommandHandler("apikeys", apikeys_command))
+        telegram_app.add_handler(CommandHandler("setapi", setapi_command))
+        telegram_app.add_handler(CommandHandler("testapi", testapi_command))
+        
         # Callback handler
         telegram_app.add_handler(CallbackQueryHandler(button_callback))
         
