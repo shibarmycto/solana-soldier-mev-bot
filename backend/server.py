@@ -2929,6 +2929,7 @@ async def start_whale_monitor():
 async def startup_event():
     """Start telegram bot and trading components on app startup"""
     global jupiter_dex, rug_detector, whale_monitor, auto_trader, trending_scanner, helius_rpc, whale_monitor_task
+    global soldiers_army, nft_aggregator
     
     logger.info("=" * 50)
     logger.info("🎖️ SOLANA SOLDIER API STARTING 🎖️")
@@ -2971,6 +2972,14 @@ async def startup_event():
     logger.info(f"   - Auto-Trade on Whale: {'ENABLED' if AUTO_TRADE_ON_WHALE_SIGNAL else 'DISABLED'}")
     logger.info(f"   - Min Profit Target: ${MIN_PROFIT_USD}")
     logger.info(f"   - Max Trade: {MAX_TRADE_SOL} SOL")
+    
+    # Initialize Solana Soldiers (Faucet Mining)
+    soldiers_army = SolanaSoldiersArmy(db=get_telegram_db(), telegram_notify=telegram_notify_user)
+    logger.info(f"✅ Solana Soldiers initialized ({len(CRYPTO_FAUCETS)} faucets)")
+    
+    # Initialize NFT Aggregator
+    nft_aggregator = NFTAggregator()
+    logger.info("✅ NFT Aggregator initialized")
     
     # Start whale monitor in background
     whale_monitor_task = asyncio.create_task(start_whale_monitor())
